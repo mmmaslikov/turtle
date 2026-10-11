@@ -402,7 +402,7 @@ function debounce(fn, ms){
 }
 function firstName(){
   var n = state.name.trim().split(/\s+/);
-  return n.length ? n[0] : '';
+  return n.length ? n[1] : '';
 }
 
 /* ============================================================
@@ -551,7 +551,7 @@ function setupStart(){
 ============================================================ */
 function theoryHTML(){
   var h = '<section class="screen">' + backHTML();
-  h += '<h1 id="screen-title" tabindex="-1">Теория <span id="hello-name"></span></h1>';
+  h += '<h1 id="screen-title" tabindex="-1">Теория<span id="hello-name"></span></h1>';
   h += '<p class="subtitle">Прочитай внимательно — в конце будет короткая проверка. Это займёт ~10 минут.</p>';
 
   h += '<div class="card"><h2>1. Что такое программа? 🤖</h2>';
