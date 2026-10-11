@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Урок 1 · Знакомство с программированием и Turtle — Я исследователь</title>
+<title>Урок 1 · Знакомство с программированием и Turtle — Я — исследователь</title>
 <style>
 /* ===== ПЕРЕМЕННЫЕ ===== */
 :root{
@@ -41,6 +41,7 @@ h3{font-size:16px;margin:0 0 6px}
 .muted{color:var(--muted);font-size:14px}
 p{margin:0 0 10px}
 b{font-weight:650}
+code{font-family:var(--mono);font-size:.92em;background:#f0f0f2;border-radius:5px;padding:1px 5px}
 
 /* ===== ВЕРХНЯЯ ПАНЕЛЬ / ШАГИ ===== */
 .topbar{
@@ -69,7 +70,6 @@ b{font-weight:650}
   padding:20px;box-shadow:var(--shadow);margin-bottom:16px;
 }
 .card.tinted{background:#f0f7ff}
-.card-accent{border-left:4px solid var(--accent)}
 .screen{animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -193,6 +193,7 @@ input[type="file"]::file-selector-button{
   background:#fff;font-family:inherit;font-size:14px;font-weight:600;color:var(--accent);
   cursor:pointer;margin-right:12px;
 }
+.btn-from-sim{margin-top:10px;min-height:40px;padding:8px 16px;font-size:14px}
 
 /* ===== ИТОГ ===== */
 .result-hero{text-align:center;padding:28px 20px}
@@ -242,9 +243,11 @@ input[type="file"]::file-selector-button{
 /* ============================================================
    КОНСТАНТЫ
 ============================================================ */
-var LS_KEY = 'turtle_lesson1_v1';
+var LS_KEY = 'turtle_lesson1_v2';
 
-var STEPS = ['Теория','Проверка','Практика','Проект','Итог'];
+var COURSE_NAME = '«Я — исследователь: первые шаги в программировании»';
+
+var STEPS = ['Теория','Проверка','Практика','Итог'];
 
 var QUIZ = [
   {
@@ -313,7 +316,7 @@ var COLOR_MAP = {
 
 /* Команды, которые тренажёр молча пропускает (служебные строки Python) */
 var IGNORE_CMDS = ['shape','speed','hideturtle','showturtle','done','exitonclick',
-  'screensize','setup','title','bgcolor','tracer','delay','pensize_ignored'];
+  'screensize','setup','title','bgcolor','tracer','delay'];
 
 var SAMPLE_CODE =
 '# Моя первая программа — квадрат\n' +
@@ -375,7 +378,10 @@ function save(){
 function load(){
   try{
     var raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    var d = JSON.parse(raw);
+    if (d && d.screen === 'project') d.screen = 'practice'; // экраны объединены
+    return d;
   }catch(e){ return null; }
 }
 function clearSaved(){
@@ -398,7 +404,6 @@ function firstName(){
   var n = state.name.trim().split(/\s+/);
   return n.length ? n[0] : '';
 }
-function esc(s){ /* для статических шаблонов не используем пользовательский ввод */ return s; }
 
 /* ============================================================
    ПОДСЧЁТ БАЛЛОВ
@@ -429,7 +434,7 @@ function ratingText(total){
 ============================================================ */
 function headerHTML(){
   if (state.screen === 'start') return '';
-  var order = { theory:0, quiz:1, practice:2, project:3, result:4 };
+  var order = { theory:0, quiz:1, practice:2, result:3 };
   var idx = order[state.screen];
   var h = '<header class="topbar"><div class="topbar-inner">';
   h += '<span class="lesson-badge">🐢 Урок 1 · Turtle</span>';
@@ -456,16 +461,16 @@ function startHTML(){
   h += '<div class="card start-card">';
   h += '<div class="logo" aria-hidden="true">🐢</div>';
   h += '<h1 id="screen-title" tabindex="-1">Привет, исследователь!</h1>';
-  h += '<p class="subtitle">Курс «Я — исследователь: рисуем кодом» · 5–6 класс<br>';
+  h += '<p class="subtitle">Курс «Я — исследователь: первые шаги в программировании» · 5–6 класс<br>';
   h += '<b>Урок 1.</b> Знакомство с программированием и библиотекой Turtle<br>';
-  h += '<span class="muted">⏱ Примерно 40 минут</span></p>';
+  h += '<span class="muted">👨‍🏫 Учитель: Масликов Михаил Михайлович</span></p>';
   h += '<form id="start-form" novalidate>';
   h += '<div class="field"><label for="f-name">Фамилия и имя</label>';
   h += '<input id="f-name" type="text" maxlength="60" autocomplete="name" placeholder="Например: Иванова Мария">';
   h += '<p class="err" id="e-name" hidden></p></div>';
   h += '<div class="field"><label for="f-class">Класс</label>';
   h += '<select id="f-class"><option value="">Выбери класс…</option>';
-  var classes = ['5 А','5 Б','5 В','5 Г','6 А','6 Б','6 В','6 Г'];
+  var classes = ['5.1','5.2','5.3','6.1','6.2','6.3'];
   for (var i=0;i<classes.length;i++){
     h += '<option value="' + classes[i] + '">' + classes[i] + '</option>';
   }
@@ -473,7 +478,7 @@ function startHTML(){
   if (hasSaved){
     h += '<div class="actions"><button class="btn btn-primary" type="button" id="btn-continue">▶ Продолжить урок</button>';
     h += '<button class="btn btn-ghost" type="submit">Начать заново</button></div>';
-    h += '<div class="saved-note">💾 Найден сохранённый прогресс: можно продолжить с места остановки. Скриншот мини-проекта нужно будет прикрепить заново — браузер не хранит картинки.</div>';
+    h += '<div class="saved-note">💾 Найден сохранённый прогресс: можно продолжить с места остановки. Рисунок мини-проекта нужно будет прикрепить заново — браузер не хранит картинки.</div>';
   } else {
     h += '<div class="actions"><button class="btn btn-primary" type="submit">Начать урок →</button></div>';
   }
@@ -516,6 +521,7 @@ function setupStart(){
     clearSaved(); savedData = null;
     state.quiz = { answers:[null,null,null,null,null], checked:false, score:0 };
     state.project = { code:'', shotName:'', hasShot:false };
+    state.simCode = '';
     if (state.shotUrl){ URL.revokeObjectURL(state.shotUrl); }
     state.shotUrl = null;
     state.screen = 'theory';
@@ -555,7 +561,8 @@ function theoryHTML(){
   h += '<div class="card"><h2>2. Язык Python 🐍</h2>';
   h += '<p>Мы будем программировать на языке <b>Python</b> (читается «Пайтон»). На нём работают поисковики, игры и даже нейросети!</p>';
   h += '<p>Программы можно запускать:</p>';
-  h += '<ul class="steps-list"><li>в <b>PyCharm</b> — специальной программе для программистов;</li><li>в <b>IDLE</b> — оно устанавливается вместе с Python;</li><li>в <b>онлайн-сервисах</b> «Turtle Python онлайн» — прямо в браузере, ничего устанавливать не нужно.</li></ul>';
+  h += '<ul class="steps-list"><li>в <b>PyCharm</b> — специальной программе для программистов;</li><li>в <b>IDLE</b> — оно устанавливается вместе с Python;</li><li>в <b>онлайн-сервисах</b> «Turtle Python онлайн» — прямо в браузере.</li></ul>';
+  h += '<p>Но сегодня ничего открывать не нужно — <b>черепашка живёт прямо в этом рабочем листе</b>, на экране практики. 🎮</p>';
   h += '<p class="code-cap">Вот так выглядит самая простая программа для рисования:</p>';
   h += '<pre class="code">' + THEORY_CODE + '</pre>';
   h += '<p class="muted">Знак # означает комментарий — пояснение для человека, компьютер его не выполняет.</p></div>';
@@ -572,11 +579,11 @@ function theoryHTML(){
   h += '<tr><td>width(3)</td><td>толщина линии</td></tr>';
   h += '<tr><td>penup() / pendown()</td><td>поднять / опустить фломастер (рисовать или просто идти)</td></tr>';
   h += '</tbody></table>';
-  h += '<p class="muted" style="margin-top:10px">Всё это можно попробовать прямо в браузере — на следующем экране есть тренажёр черепашки! 🎮</p></div>';
+  h += '<p class="muted" style="margin-top:10px">Все эти команды можно попробовать в тренажёре на следующем экране!</p></div>';
 
   h += '<div class="card"><h2>4. Ошибки — это нормально! 🔧</h2>';
   h += '<p>Если программа не запускается — не расстраивайся. Ошибки (их называют <b>«баги»</b>) бывают у всех программистов. Поиск и исправление ошибок называется <b>отладкой</b>.</p>';
-  h += '<p>Что делать: прочитай сообщение об ошибке, проверь spelling команд (например, <i>froward</i> вместо <i>forward</i>), скобки и числа. Исправил — запусти снова!</p></div>';
+  h += '<p>Что делать: прочитай сообщение об ошибке, проверь, правильно ли написаны команды (например, <i>froward</i> вместо <i>forward</i>), скобки и числа. Исправил — запусти снова!</p></div>';
 
   h += '<div class="actions"><button class="btn btn-primary" id="to-quiz" type="button">Далее — проверка знаний →</button></div>';
   h += '</section>';
@@ -629,7 +636,7 @@ function quizHTML(){
     h += '<button class="btn btn-primary" id="quiz-next" type="button">Далее — практика →</button>';
     h += '</div>';
   } else {
-    h += '<p class="err" id="quiz-err" hidden>Сначала ответь на все вопросы — осталось выбрать ответ в некоторых карточках.</p>';
+    h += '<p class="err" id="quiz-err" hidden>Сначала ответь на все вопросы.</p>';
     h += '<div class="actions"><button class="btn btn-primary" id="quiz-check" type="button">Проверить ответы</button></div>';
   }
   h += '</section>';
@@ -683,18 +690,18 @@ function setupQuiz(){
 }
 
 /* ============================================================
-   ЭКРАН: ПРАКТИКА (ТРЕНАЖЁР ЧЕРЕПАШКИ)
+   ЭКРАН: ПРАКТИКА + МИНИ-ПРОЕКТ (ОБЪЕДИНЁННЫЙ)
 ============================================================ */
 function practiceHTML(){
   var h = '<section class="screen">' + backHTML();
-  h += '<h1 id="screen-title" tabindex="-1">Практика: рисуем кодом 🎮</h1>';
-  h += '<p class="subtitle">Здесь живёт настоящая черепашка! Пиши команды слева внизу и нажимай «Запустить». Тренажёр понимает и простые команды (<code>forward 100</code>), и питоновские (<code>t.forward(100)</code>).</p>';
+  h += '<h1 id="screen-title" tabindex="-1">Практика и мини-проект 🎮</h1>';
+  h += '<p class="subtitle">Черепашка живёт прямо здесь — ничего устанавливать не нужно! Пиши команды, запускай программу, а в конце оформи мини-проект урока.</p>';
 
-  h += '<div class="card"><h2>Твои задания на урок (~15 минут)</h2>';
+  h += '<div class="card"><h2>Твои задания (~20 минут)</h2>';
   h += '<div class="task"><span class="task-num">1</span><div><h3>Первые шаги</h3><p>Набери команду <code>forward 150</code> и нажми «▶ Запустить». Черепашка пройдёт вперёд и нарисует линию.</p></div></div>';
   h += '<div class="task"><span class="task-num">2</span><div><h3>Квадрат</h3><p>Нарисуй квадрат со стороной 100. Подсказка: нужны команды <code>forward</code> и <code>right 90</code> — всего 8 строчек. Или нажми «Пример: квадрат» и изучи готовую программу.</p></div></div>';
   h += '<div class="task"><span class="task-num">3</span><div><h3>Разноцветные линии</h3><p>Нарисуй три линии разными цветами и разной толщины. Команды <code>color red</code>, <code>width 5</code>, а чтобы перейти в другое место — <code>penup</code>, <code>forward 50</code>, <code>pendown</code>.</p></div></div>';
-  h += '<div class="task"><span class="task-num">★</span><div><h3>Бонус для смелых</h3><p>Нарисуй домик (квадрат + крыша), букву или солнышко с помощью <code>circle 50</code>. Сделай скриншот — он пригодится для мини-проекта!</p></div></div>';
+  h += '<div class="task"><span class="task-num">★</span><div><h3>Мини-проект урока</h3><p>Придумай свой рисунок: домик, цветок, ракету, узор или букву. Нарисуй его в тренажёре, скачай картинку и оформи проект в нижней части страницы.</p></div></div>';
   h += '</div>';
 
   h += '<div class="card"><h2>Тренажёр черепашки 🐢</h2>';
@@ -705,6 +712,7 @@ function practiceHTML(){
   h += '<button class="btn btn-secondary" id="btn-stop" type="button" disabled>■ Стоп</button>';
   h += '<button class="btn btn-ghost" id="btn-sample" type="button">Пример: квадрат</button>';
   h += '<button class="btn btn-ghost" id="btn-clear" type="button">Очистить</button>';
+  h += '<button class="btn btn-ghost" id="btn-download" type="button">📷 Скачать рисунок</button>';
   h += '</div>';
   h += '<div><label class="lbl" for="sim-code">Код программы</label>';
   h += '<textarea id="sim-code" rows="8" spellcheck="false" aria-describedby="sim-status" placeholder="forward 100&#10;right 90&#10;forward 100"></textarea></div>';
@@ -725,7 +733,26 @@ function practiceHTML(){
   h += '</tbody></table></details>';
   h += '</div></div>';
 
-  h += '<div class="actions"><button class="btn btn-primary" id="to-project" type="button">Далее — мини-проект →</button></div>';
+  h += '<div class="card tinted"><h2>Мини-проект «Мой первый рисунок» 🎨</h2>';
+  h += '<ol class="steps-list">';
+  h += '<li>Придумай идею рисунка: домик, цветок, ракета, узор, буква или персонаж.</li>';
+  h += '<li>Напиши программу в тренажёре выше и нажми «▶ Запустить». Если есть ошибка — исправь (это отладка 🔧).</li>';
+  h += '<li>Сохрани картинку: нажми «📷 Скачать рисунок» — файл попадёт в загрузки. Или сделай скриншот (PrintScreen / «Ножницы»).</li>';
+  h += '<li>Перенеси свой код в поле ниже — поможет кнопка «Вставить код из тренажёра».</li>';
+  h += '<li>Прикрепи картинку и нажми «Завершить урок» — рабочий лист сохранится и его можно будет отправить учителю в PDF.</li>';
+  h += '</ol></div>';
+
+  h += '<div class="card"><label class="lbl" for="project-code">Итоговый код программы</label>';
+  h += '<textarea id="project-code" rows="8" spellcheck="false" placeholder="color green&#10;width 3&#10;forward 100&#10;right 90&#10;..."></textarea>';
+  h += '<button class="btn btn-ghost btn-from-sim" id="btn-from-sim" type="button">⬆ Вставить код из тренажёра</button>';
+  h += '<p class="err" id="e-code" hidden></p></div>';
+
+  h += '<div class="card"><label class="lbl" for="shot-input">Рисунок (скачанный файл или скриншот)</label>';
+  h += '<input id="shot-input" type="file" accept="image/*" aria-describedby="shot-area">';
+  h += '<div id="shot-area" style="margin-top:12px"></div>';
+  h += '<p class="err" id="e-shot" hidden></p></div>';
+
+  h += '<div class="actions"><button class="btn btn-primary" id="btn-submit" type="button">Завершить урок ✓</button></div>';
   h += '</section>';
   return h;
 }
@@ -793,7 +820,7 @@ function parseProgram(text){
     } else if (IGNORE_CMDS.indexOf(cmd) !== -1){
       continue; // служебные команды Python пропускаем
     } else {
-      return { ops:null, error:{ line:ln, text:'непонятная команда «' + parts[0] + '». Открой шпаргалку ниже и проверь spelling.' } };
+      return { ops:null, error:{ line:ln, text:'непонятная команда «' + parts[0] + '». Загляни в шпаргалку и проверь, правильно ли она написана.' } };
     }
   }
   return { ops:ops, error:null };
@@ -912,57 +939,31 @@ function simStop(){
     if (st){ st.className = 'status'; st.textContent = 'Остановлено.'; }
   }
 }
-
-function setupPractice(){
-  var ta = el('sim-code');
-  ta.value = state.simCode || '';
-  simReset();
-  simSetButtons();
-  var saveSim = debounce(function(){ state.simCode = ta.value; save(); }, 400);
-  ta.addEventListener('input', saveSim);
-  el('btn-run').addEventListener('click', function(){ state.simCode = ta.value; save(); simRun(); });
-  el('btn-stop').addEventListener('click', simStop);
-  el('btn-clear').addEventListener('click', function(){ simStop(); simReset(); var st = el('sim-status'); st.className='status'; st.textContent='Поле очищено. Можно рисовать заново!'; });
-  el('btn-sample').addEventListener('click', function(){
-    simStop();
-    ta.value = SAMPLE_CODE;
-    state.simCode = SAMPLE_CODE; save();
-    var st = el('sim-status'); st.className='status'; st.textContent='Я загрузил пример — квадрат. Нажми «▶ Запустить»!';
-  });
-  el('to-project').addEventListener('click', function(){ simStop(); state.screen = 'project'; save(); render(); });
+function simDownload(){
+  var cv = el('sim-canvas');
+  if (!cv) return;
+  var st = el('sim-status');
+  if (!sim.segments.length){
+    st.className = 'status status-err';
+    st.textContent = 'Пока нечего скачивать — сначала нарисуй что-нибудь 🙂';
+    return;
+  }
+  // переносим рисунок на белый фон и сохраняем как PNG
+  var tmp = document.createElement('canvas');
+  tmp.width = cv.width; tmp.height = cv.height;
+  var tctx = tmp.getContext('2d');
+  tctx.fillStyle = '#ffffff';
+  tctx.fillRect(0,0,tmp.width,tmp.height);
+  tctx.drawImage(cv,0,0);
+  var link = document.createElement('a');
+  link.download = 'moi-risunok.png';
+  link.href = tmp.toDataURL('image/png');
+  link.click();
+  st.className = 'status status-ok';
+  st.textContent = '📷 Рисунок сохранён в загрузки! Теперь прикрепи его в мини-проекте ниже.';
 }
 
-/* ============================================================
-   ЭКРАН: МИНИ-ПРОЕКТ
-============================================================ */
-function projectHTML(){
-  var h = '<section class="screen">' + backHTML();
-  h += '<h1 id="screen-title" tabindex="-1">Мини-проект «Мой первый рисунок» 🎨</h1>';
-  h += '<p class="subtitle">Финальное задание урока. Всё, что ты сделаешь, попадёт в твой рабочий лист, который можно сохранить как PDF.</p>';
-
-  h += '<div class="card tinted"><h2>Что нужно сделать</h2>';
-  h += '<ol class="steps-list">';
-  h += '<li>Открой <b>PyCharm</b>, <b>IDLE</b> или онлайн-сервис «Turtle Python онлайн».</li>';
-  h += '<li>Придумай и нарисуй картинку командами черепашки: домик, цветок, ракету, узор, букву или робота — что хочешь!</li>';
-  h += '<li>Запусти программу и исправь ошибки, если они есть (это и есть отладка 🔧).</li>';
-  h += '<li>Сделай <b>скриншот</b> рисунка (клавиша PrintScreen или «Ножницы»).</li>';
-  h += '<li>Вставь ниже свой <b>код</b> и <b>скриншот</b> и нажми «Завершить урок».</li>';
-  h += '</ol></div>';
-
-  h += '<div class="card"><label class="lbl" for="project-code">Итоговый код программы</label>';
-  h += '<textarea id="project-code" rows="8" spellcheck="false" placeholder="import turtle&#10;&#10;t = turtle.Turtle()&#10;t.forward(100)&#10;t.right(90)&#10;..."></textarea>';
-  h += '<p class="err" id="e-code" hidden></p></div>';
-
-  h += '<div class="card"><label class="lbl" for="shot-input">Скриншот рисунка</label>';
-  h += '<input id="shot-input" type="file" accept="image/*" aria-describedby="shot-area">';
-  h += '<div id="shot-area" style="margin-top:12px"></div>';
-  h += '<p class="err" id="e-shot" hidden></p></div>';
-
-  h += '<div class="actions"><button class="btn btn-primary" id="btn-submit" type="button">Завершить урок ✓</button></div>';
-  h += '</section>';
-  return h;
-}
-
+/* ---------- Область скриншота ---------- */
 function renderShotArea(){
   var a = el('shot-area');
   if (!a) return;
@@ -970,7 +971,7 @@ function renderShotArea(){
   if (state.project.hasShot && state.shotUrl){
     var img = document.createElement('img');
     img.src = state.shotUrl;
-    img.alt = 'Скриншот рисунка ученика';
+    img.alt = 'Рисунок ученика';
     img.className = 'shot-img';
     var cap = document.createElement('p');
     cap.className = 'shot-cap';
@@ -978,7 +979,7 @@ function renderShotArea(){
     var rm = document.createElement('button');
     rm.type = 'button';
     rm.className = 'btn btn-ghost';
-    rm.textContent = 'Удалить снимок';
+    rm.textContent = 'Удалить рисунок';
     rm.addEventListener('click', function(){
       if (state.shotUrl) URL.revokeObjectURL(state.shotUrl);
       state.shotUrl = null;
@@ -992,17 +993,48 @@ function renderShotArea(){
     var p = document.createElement('p');
     p.className = 'muted';
     p.textContent = state.project.shotName
-      ? 'Раньше был прикреплён файл «' + state.project.shotName + '», но браузер не хранит картинки — прикрепи скриншот заново.'
-      : 'Скриншот пока не прикреплён.';
+      ? 'Раньше был прикреплён файл «' + state.project.shotName + '», но браузер не хранит картинки — прикрепи рисунок заново.'
+      : 'Рисунок пока не прикреплён.';
     a.appendChild(p);
   }
 }
 
-function setupProject(){
-  var ta = el('project-code');
-  ta.value = state.project.code;
-  var saveCode = debounce(function(){ state.project.code = ta.value; save(); }, 400);
-  ta.addEventListener('input', saveCode);
+function setupPractice(){
+  /* --- тренажёр --- */
+  var ta = el('sim-code');
+  ta.value = state.simCode || '';
+  simReset();
+  simSetButtons();
+  var saveSim = debounce(function(){ state.simCode = ta.value; save(); }, 400);
+  ta.addEventListener('input', saveSim);
+  el('btn-run').addEventListener('click', function(){ state.simCode = ta.value; save(); simRun(); });
+  el('btn-stop').addEventListener('click', simStop);
+  el('btn-download').addEventListener('click', simDownload);
+  el('btn-clear').addEventListener('click', function(){ simStop(); simReset(); var st = el('sim-status'); st.className='status'; st.textContent='Поле очищено. Можно рисовать заново!'; });
+  el('btn-sample').addEventListener('click', function(){
+    simStop();
+    ta.value = SAMPLE_CODE;
+    state.simCode = SAMPLE_CODE; save();
+    var st = el('sim-status'); st.className='status'; st.textContent='Я загрузил пример — квадрат. Нажми «▶ Запустить»!';
+  });
+
+  /* --- мини-проект --- */
+  var codeTa = el('project-code');
+  codeTa.value = state.project.code;
+  var saveCode = debounce(function(){ state.project.code = codeTa.value; save(); }, 400);
+  codeTa.addEventListener('input', saveCode);
+
+  el('btn-from-sim').addEventListener('click', function(){
+    var simTa = el('sim-code');
+    state.simCode = simTa.value;
+    codeTa.value = simTa.value;
+    state.project.code = simTa.value;
+    save();
+    el('e-code').hidden = true;
+    var btn = el('btn-from-sim');
+    btn.textContent = '✔ Код вставлен!';
+    setTimeout(function(){ btn.textContent = '⬆ Вставить код из тренажёра'; }, 2000);
+  });
 
   var shotInput = el('shot-input');
   shotInput.addEventListener('change', function(){
@@ -1032,16 +1064,16 @@ function setupProject(){
   renderShotArea();
 
   el('btn-submit').addEventListener('click', function(){
-    state.project.code = ta.value;
+    simStop();
+    state.project.code = codeTa.value;
     var eCode = el('e-code');
     eCode.hidden = true;
     if (state.project.code.trim().length < 10){
-      eCode.textContent = 'Вставь код своей программы (хотя бы несколько команд) — иначе черепашка тебе не поверит 😉';
+      eCode.textContent = 'Вставь код своей программы (хотя бы несколько команд). Можно нажать «⬆ Вставить код из тренажёра» 😉';
       eCode.hidden = false;
-      ta.focus();
+      codeTa.focus();
       return;
     }
-    save();
     state.screen = 'result';
     save();
     render();
@@ -1058,7 +1090,7 @@ function resultHTML(){
   h += '<div class="card result-hero">';
   h += '<div class="logo" aria-hidden="true">🏁</div>';
   h += '<h1 id="screen-title" tabindex="-1">Урок пройден!</h1>';
-  h += '<p class="subtitle" style="margin-bottom:8px"><span id="res-name"></span> · <span id="res-class"></span> · ' + dateStr + '</p>';
+  h += '<p class="subtitle" style="margin-bottom:8px"><span id="res-name"></span> · класс <span id="res-class"></span> · ' + dateStr + '</p>';
   h += '<div class="result-total">' + sc.total + '<span class="muted" style="font-size:20px;font-weight:500"> / 20 баллов</span></div>';
   h += '<p class="result-rating">' + ratingText(sc.total) + '</p>';
   h += '<p class="muted">Результат: ' + sc.percent + '%</p>';
@@ -1067,12 +1099,12 @@ function resultHTML(){
   h += '<div class="card"><h2>Из чего сложились баллы</h2><ul class="res-rows">';
   h += '<li><span>Проверка знаний: ' + (state.quiz.checked ? sc.correct + ' из 5 верных ответов' : 'не пройдена') + '</span><span class="pts">' + sc.quizPoints + ' / 10</span></li>';
   h += '<li><span>Код мини-проекта ' + (sc.codePoints ? '<span class="ok-mark">✔ приложен</span>' : '<span class="bad-mark">✘ не найден</span>') + '</span><span class="pts">' + sc.codePoints + ' / 5</span></li>';
-  h += '<li><span>Скриншот рисунка ' + (sc.shotPoints ? '<span class="ok-mark">✔ прикреплён</span>' : '<span class="bad-mark">✘ не прикреплён</span>') + '</span><span class="pts">' + sc.shotPoints + ' / 5</span></li>';
+  h += '<li><span>Рисунок ' + (sc.shotPoints ? '<span class="ok-mark">✔ прикреплён</span>' : '<span class="bad-mark">✘ не прикреплён</span>') + '</span><span class="pts">' + sc.shotPoints + ' / 5</span></li>';
   h += '</ul></div>';
 
   if (!sc.shotPoints || !sc.codePoints){
-    h += '<div class="card tinted"><p style="margin:0">💡 Чтобы получить все 20 баллов, вернись к мини-проекту и добавь ' +
-         (!sc.codePoints && !sc.shotPoints ? 'код и скриншот' : (!sc.codePoints ? 'код' : 'скриншот')) + '.</p></div>';
+    h += '<div class="card tinted"><p style="margin:0">💡 Чтобы получить все 20 баллов, вернись к практике и добавь ' +
+         (!sc.codePoints && !sc.shotPoints ? 'код и рисунок' : (!sc.codePoints ? 'код' : 'рисунок')) + '.</p></div>';
   }
 
   h += '<div class="actions">';
@@ -1087,7 +1119,7 @@ function resultHTML(){
 function setupResult(){
   var nameEl = el('res-name'), classEl = el('res-class');
   if (nameEl) nameEl.textContent = state.name;
-  if (classEl) classEl.textContent = state.klass + ' класс';
+  if (classEl) classEl.textContent = state.klass;
   el('btn-print').addEventListener('click', function(){
     buildPrintReport();
     window.print();
@@ -1100,7 +1132,7 @@ function setupResult(){
       render();
     }
   });
-  buildPrintReport(); // отчет готов заранее
+  buildPrintReport(); // отчёт готов заранее
 }
 
 /* ============================================================
@@ -1120,7 +1152,7 @@ function buildPrintReport(){
   var dateStr = new Date().toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
 
   r.appendChild(mk('h1','pr-h1','Рабочий лист · Урок 1'));
-  r.appendChild(mk('p','pr-sub','Курс «Я — исследователь: рисуем кодом» · Знакомство с программированием и библиотекой Turtle'));
+  r.appendChild(mk('p','pr-sub','Курс «Я — исследователь: первые шаги в программировании» · Знакомство с программированием и библиотекой Turtle'));
 
   var meta = mk('p','pr-meta');
   meta.appendChild(mk('div',null,'Ученик: ' + state.name));
@@ -1146,15 +1178,15 @@ function buildPrintReport(){
   r.appendChild(mk('h2','pr-h2','Мини-проект «Мой первый рисунок»'));
   r.appendChild(mk('p',null,'Код программы:'));
   r.appendChild(mk('pre','pr-code', state.project.code.trim() ? state.project.code : '(код не приложен)'));
-  r.appendChild(mk('p',null,'Скриншот рисунка:'));
+  r.appendChild(mk('p',null,'Рисунок:'));
   if (state.project.hasShot && state.shotUrl){
     var img = document.createElement('img');
     img.src = state.shotUrl;
-    img.alt = 'Скриншот рисунка';
+    img.alt = 'Рисунок ученика';
     img.className = 'pr-img';
     r.appendChild(img);
   } else {
-    r.appendChild(mk('p','pr-sub','(скриншот не прикреплён)'));
+    r.appendChild(mk('p','pr-sub','(рисунок не прикреплён)'));
   }
 
   // Итог
@@ -1162,13 +1194,13 @@ function buildPrintReport(){
   totalP.appendChild(mk('b',null,'Итог: ' + sc.total + ' из 20 баллов (' + sc.percent + '%). '));
   totalP.appendChild(document.createTextNode(ratingText(sc.total)));
   r.appendChild(totalP);
-  r.appendChild(mk('p','pr-sub','Учитель информатики · курс «Я — исследователь: рисуем кодом»'));
+  r.appendChild(mk('p','pr-sub','Учитель информатики · курс «Я — исследователь: первые шаги в программировании»'));
 }
 
 /* ============================================================
    РОУТЕР / RENDER
 ============================================================ */
-var BACK_MAP = { theory:'start', quiz:'theory', practice:'quiz', project:'practice', result:'project' };
+var BACK_MAP = { theory:'start', quiz:'theory', practice:'quiz', result:'practice' };
 
 function render(){
   simStop();
@@ -1178,7 +1210,6 @@ function render(){
     case 'theory':   html += theoryHTML();   break;
     case 'quiz':     html += quizHTML();     break;
     case 'practice': html += practiceHTML(); break;
-    case 'project':  html += projectHTML();  break;
     case 'result':   html += resultHTML();   break;
     default:         html += startHTML();    state.screen = 'start';
   }
@@ -1205,7 +1236,6 @@ function setupScreen(){
     case 'theory':   setupTheory();   break;
     case 'quiz':     setupQuiz();     break;
     case 'practice': setupPractice(); break;
-    case 'project':  setupProject();  break;
     case 'result':   setupResult();   break;
   }
 }
