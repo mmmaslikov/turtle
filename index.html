@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Я — исследователь: первые шаги в программировании · Рисуем кодом</title>
+<meta name="description" content="Курс внеурочной деятельности для 5–6 классов: учимся программировать на Python с библиотекой Turtle — рисуем кодом!">
+<style>
+/* ===== ПЕРЕМЕННЫЕ (единый стиль с рабочими листами) ===== */
+:root{
+  --bg:#f5f5f7;
+  --card:#ffffff;
+  --text:#1d1d1f;
+  --muted:#6e6e73;
+  --accent:#0071e3;
+  --accent-hover:#0077ed;
+  --green:#34c759;
+  --green-dark:#248a3d;
+  --orange:#ff9500;
+  --purple:#af52de;
+  --red:#ff3b30;
+  --line:#e8e8ed;
+  --line-soft:#f0f0f2;
+  --radius:18px;
+  --shadow:0 1px 3px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:960px;margin:0 auto;padding:0 16px 56px}
+
+/* ===== ТИПОГРАФИКА ===== */
+h1{font-size:clamp(28px,6vw,42px);letter-spacing:-.025em;margin:0 0 12px;line-height:1.15}
+h2{font-size:clamp(21px,4vw,26px);letter-spacing:-.02em;margin:0 0 8px;line-height:1.2}
+h3{font-size:17px;margin:0 0 6px}
+.subtitle{color:var(--muted);margin:0 0 20px;font-size:17px}
+.muted{color:var(--muted);font-size:14px}
+p{margin:0 0 10px}
+b{font-weight:650}
+code{font-family:var(--mono);font-size:.92em;background:#f0f0f2;border-radius:5px;padding:1px 5px}
+.section-head{margin:48px 0 20px;text-align:center}
+.section-head .subtitle{margin-bottom:0}
+button:focus-visible,a:focus-visible{
+  outline:3px solid rgba(0,113,227,.4);outline-offset:2px;border-radius:8px;
+}
+
+/* ===== ШАПКА ===== */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:rgba(245,245,247,.85);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:960px;margin:0 auto;padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-.01em;text-decoration:none;color:var(--text)}
+.brand:hover{color:var(--accent)}
+.brand .brand-logo{font-size:22px}
+.topnav{display:flex;gap:4px}
+.topnav a{
+  color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;
+  padding:10px 12px;border-radius:10px;min-height:44px;display:inline-flex;align-items:center;
+}
+.topnav a:hover{color:var(--accent);background:#f0f7ff}
+@media(max-width:479px){.topnav .nav-about{display:none}}
+
+/* ===== КАРТОЧКИ И КНОПКИ ===== */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  padding:22px;box-shadow:var(--shadow);
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:12px 24px;border-radius:12px;border:none;
+  font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;
+  transition:background .15s ease,transform .1s ease;text-decoration:none;
+}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:transparent;color:var(--accent);border:1px solid #d2d2d7}
+.btn-ghost:hover{background:#f0f7ff}
+
+/* ===== ГЕРОЙ ===== */
+.hero{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:48px 8px 8px;gap:20px;
+}
+.hero-canvas-wrap{position:relative}
+#hero-canvas{
+  width:190px;height:190px;max-width:60vw;max-height:60vw;
+  border:1px solid var(--line);border-radius:24px;background:#fff;
+  box-shadow:var(--shadow);display:block;
+}
+.hero h1 .accent{color:var(--accent)}
+.hero .subtitle{max-width:560px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#fff;border:1px solid var(--line);border-radius:999px;
+  padding:8px 14px;font-size:13px;font-weight:600;color:var(--muted);
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* ===== О КУРСЕ ===== */
+.about-grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:720px){.about-grid{grid-template-columns:1.2fr .8fr}}
+.about-text p{font-size:16px}
+.fact-list{list-style:none;margin:0;padding:0}
+.fact-list li{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:12px 2px;border-bottom:1px solid var(--line-soft);font-size:15px;
+}
+.fact-list li:last-child{border-bottom:none}
+.fact-ico{font-size:20px;flex:none;margin-top:1px}
+
+/* ===== СУПЕРСИЛЫ ===== */
+.powers{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:560px){.powers{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:860px){.powers{grid-template-columns:repeat(3,1fr)}}
+.power{display:flex;flex-direction:column;gap:4px}
+.power-ico{
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:8px;background:#f0f7ff;
+}
+.power p{font-size:14px;color:var(--muted);margin:0}
+
+/* ===== КАТАЛОГ УРОКОВ ===== */
+.lessons{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:640px){.lessons{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.lessons{grid-template-columns:repeat(3,1fr)}}
+.lesson-card{
+  display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--text);
+  border:1px solid transparent;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;
+  min-height:100%;
+}
+.lesson-card:hover{transform:translateY(-3px);box-shadow:0 4px 8px rgba(0,0,0,.06),0 14px 34px rgba(0,0,0,.09);border-color:#d9e9fb}
+.lesson-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lesson-num{
+  width:38px;height:38px;border-radius:12px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;background:#f0f7ff;color:var(--accent);
+}
+.lesson-card.ready .lesson-num{background:var(--accent);color:#fff}
+.status-pill{
+  font-size:12px;font-weight:700;border-radius:999px;padding:5px 10px;white-space:nowrap;
+}
+.status-pill.ready{background:#e8f9ed;color:var(--green-dark)}
+.status-pill.soon{background:#f0f0f2;color:var(--muted)}
+.lesson-card p.desc{font-size:14px;color:var(--muted);margin:0;flex:1}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px}
+.tag{
+  font-family:var(--mono);font-size:12px;background:#f5f5f7;border:1px solid var(--line);
+  border-radius:7px;padding:3px 8px;color:#515154;
+}
+.lesson-cta{font-size:14px;font-weight:650;color:var(--accent);min-height:44px;display:flex;align-items:center}
+.lesson-card.soon .lesson-cta{color:var(--muted)}
+.lesson-card.soon{opacity:.82}
+
+/* ===== КАК ПРОХОДИТ УРОК ===== */
+.flow{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.flow{grid-template-columns:repeat(4,1fr)}}
+.flow-step{text-align:left;padding:18px}
+.flow-num{
+  width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+  font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;
+}
+.flow-step p{font-size:13.5px;color:var(--muted);margin:0}
+.flow-step .flow-time{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--accent);background:#f0f7ff;border-radius:999px;padding:3px 10px}
+
+/* ===== ЗАМЕТКА УЧИТЕЛЮ ===== */
+.teacher-note{background:#fffbeb;border:1px solid #f5e3b3}
+.teacher-note h2{font-size:18px}
+.teacher-note p{font-size:14.5px;color:#6b5d33;margin:0}
+
+/* ===== ПОДВАЛ ===== */
+.footer{
+  text-align:center;padding:32px 16px 8px;color:var(--muted);font-size:14px;
+  border-top:1px solid var(--line);margin-top:56px;
+}
+.footer .heart{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- ===== ШАПКА ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top"><span class="brand-logo" aria-hidden="true">🐢</span> Рисуем кодом</a>
+    <nav class="topnav" aria-label="Разделы страницы">
+      <a class="nav-about" href="#about">О курсе</a>
+      <a href="#lessons">Уроки</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ===== ГЕРОЙ ===== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-canvas-wrap">
+      <canvas id="hero-canvas" width="190" height="190" role="img"
+        aria-label="Анимация: черепашка рисует цветные фигуры"></canvas>
+    </div>
+    <h1 id="hero-title">Я — исследователь:<br><span class="accent">первые шаги в программировании</span></h1>
+    <p class="subtitle">Курс для 5–6 классов, на котором ты научишься управлять черепашкой-художником и рисовать настоящие картинки кодом на языке Python. 🎨🐍</p>
+    <div class="badge-row" aria-label="Коротко о курсе">
+      <span class="badge">👨‍🏫 Учитель: Масликов М.М.</span>
+      <span class="badge">🎓 5–6 класс</span>
+      <span class="badge">📚 6 уроков</span>
+      <span class="badge">🐍 Python + Turtle</span>
+    </div>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#lessons">Смотреть уроки ↓</a>
+      <a class="btn btn-ghost" href="turtle1.html">▶ Начать урок 1</a>
+    </div>
+  </section>
+
+  <!-- ===== О КУРСЕ ===== -->
+  <section id="about" aria-labelledby="about-title">
+    <div class="section-head">
+      <h2 id="about-title">О курсе простыми словами</h2>
+      <p class="subtitle">Что это вообще такое — «рисовать кодом»?</p>
+    </div>
+    <div class="about-grid">
+      <div class="card about-text">
+        <p>Представь черепашку, которая живёт на экране компьютера и держит фломастер. Ты даёшь ей команды: «иди вперёд», «поверни направо», «возьми красный цвет» — а она рисует линию за линией. Так из обычных команд получаются домики, цветы, узоры и даже целые картины!</p>
+        <p>На этом курсе ты станешь <b>программистом-исследователем</b>: будешь писать команды на настоящем языке <b>Python</b>, изучишь, что такое <b>алгоритмы</b> и <b>циклы</b>, научишься находить и исправлять <b>ошибки</b> в программах.</p>
+        <p>А в конце тебя ждёт главный челлендж — <b>собственный мини-проект</b>: открытка, узор, персонаж, пейзаж или эмблема. Всё, что ты нарисуешь, будет полностью твоим! 🏆</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:10px">Коротко о курсе</h3>
+        <ul class="fact-list">
+          <li><span class="fact-ico" aria-hidden="true">🖥</span><span>Программируем прямо в рабочем листе — ничего устанавливать не нужно</span></li>
+          <li><span class="fact-ico" aria-hidden="true">🧩</span><span>6 уроков: от первой команды до презентации своего проекта</span></li>
+          <li><span class="fact-ico" aria-hidden="true">🎯</span><span>Итог курса — личный мини-проект «Графический рисунок в Turtle»</span></li>
+          <li><span class="fact-ico" aria-hidden="true">💾</span><span>Каждый урок сохраняется в PDF и отправляется учителю</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ЧЕМУ ТЫ НАУЧИШЬСЯ ===== -->
+  <section aria-labelledby="powers-title">
+    <div class="section-head">
+      <h2 id="powers-title">Какие суперсилы ты получишь</h2>
+      <p class="subtitle">Пять навыков настоящего программиста</p>
+    </div>
+    <div class="powers">
+      <div class="card power">
+        <span class="power-ico" aria-hidden="true">🧠</span>
+        <h3>Думать как программист</h3>
+        <p>Разбивать большие задачи на маленькие шаги и составлять чёткие алгоритмы.</p>
+      </div>
+      <div class="card power">
+        <span class="power-ico" aria-hidden="true">🐢</span>
+        <h3>Управлять черепашкой</h3>
+        <p>Командовать движением и рисованием: вперёд, назад, поворот, цвет, толщина линии.</p>
+      </div>
+      <div class="card power">
+        <span class="power-ico" aria-hidden="true">🐍</span>
+        <h3>Писать код на Python</h3>
+        <p>Познакомишься с одним из самых популярных языков программирования в мире.</p>
+      </div>
+      <div class="card power">
+        <span class="power-ico" aria-hidden="true">🔁</span>
+        <h3>Использовать циклы</h3>
+        <p>Заставишь компьютер повторять действия — и рисовать сложные узоры парой строчек.</p>
+      </div>
+      <div class="card power">
+        <span class="power-ico" aria-hidden="true">🔧</span>
+        <h3>Находить и чинить баги</h3>
+        <p>Отладка — суперсила! Научишься читать ошибки и исправлять свои программы.</p>
+      </div>
+      <div class="card power">
+        <span class="power-ico" aria-hidden="true">🎨</span>
+        <h3>Создавать свои проекты</h3>
+        <p>От идеи и эскиза до готовой картинки — твой первый цифровой арт-проект.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== КАТАЛОГ УРОКОВ ===== -->
+  <section id="lessons" aria-labelledby="lessons-title">
+    <div class="section-head">
+      <h2 id="lessons-title">Уроки курса</h2>
+      <p class="subtitle">Нажми на карточку урока, чтобы открыть интерактивный рабочий лист</p>
+    </div>
+    <div class="lessons">
+
+      <a class="card lesson-card ready" href="turtle1.html">
+        <div class="lesson-top">
+          <span class="lesson-num">1</span>
+          <span class="status-pill ready">✔ Готов — начни здесь!</span>
+        </div>
+        <h3>Знакомство с программированием и Turtle</h3>
+        <p class="desc">Узнаешь, что такое программа и как «думает» компьютер. Познакомишься с черепашкой, запустишь свой первый код и нарисуешь линии и фигуры по образцу.</p>
+        <div class="tag-row"><span class="tag">forward</span><span class="tag">right</span><span class="tag">left</span><span class="tag">color</span></div>
+        <span class="lesson-cta">Открыть рабочий лист →</span>
+      </a>
+
+      <a class="card lesson-card soon" href="turtle2.html">
+        <div class="lesson-top">
+          <span class="lesson-num">2</span>
+          <span class="status-pill soon">Скоро</span>
+        </div>
+        <h3>Алгоритмы рисования</h3>
+        <p class="desc">Будешь составлять пошаговые инструкции для черепашки — алгоритмы. Поэкспериментируешь с цветом, толщиной линий и скоростью и соберёшь собственный рисунок из простых фигур.</p>
+        <div class="tag-row"><span class="tag">width</span><span class="tag">penup</span><span class="tag">алгоритм</span></div>
+        <span class="lesson-cta">Открыть рабочий лист →</span>
+      </a>
+
+      <a class="card lesson-card soon" href="turtle3.html">
+        <div class="lesson-top">
+          <span class="lesson-num">3</span>
+          <span class="status-pill soon">Скоро</span>
+        </div>
+        <h3>Циклы в графических программах</h3>
+        <p class="desc">Откроешь секрет программистов: как заставить черепашку повторять действия, не пишя сто одинаковых строчек. Нарисуешь циклами красивые узоры и многоугольники.</p>
+        <div class="tag-row"><span class="tag">for</span><span class="tag">узоры</span><span class="tag">многоугольники</span></div>
+        <span class="lesson-cta">Открыть рабочий лист →</span>
+      </a>
+
+      <a class="card lesson-card soon" href="turtle4.html">
+        <div class="lesson-top">
+          <span class="lesson-num">4</span>
+          <span class="status-pill soon">Скоро</span>
+        </div>
+        <h3>Создание творческого проекта</h3>
+        <p class="desc">Придумаешь идею своего проекта: открытка, узор, персонаж, пейзаж или эмблема. Нарисуешь эскиз, определишь нужные команды — и начнёшь писать программу.</p>
+        <div class="tag-row"><span class="tag">идея</span><span class="tag">эскиз</span><span class="tag">проект</span></div>
+        <span class="lesson-cta">Открыть рабочий лист →</span>
+      </a>
+
+      <a class="card lesson-card soon" href="turtle5.html">
+        <div class="lesson-top">
+          <span class="lesson-num">5</span>
+          <span class="status-pill soon">Скоро</span>
+        </div>
+        <h3>Разработка и отладка проекта</h3>
+        <p class="desc">Доведёшь проект до идеала: найдёшь и исправишь ошибки, протестируешь программу и улучшишь оформление. Настоящая работа программиста!</p>
+        <div class="tag-row"><span class="tag">отладка</span><span class="tag">тестирование</span><span class="tag">чек-лист</span></div>
+        <span class="lesson-cta">Открыть рабочий лист →</span>
+      </a>
+
+      <a class="card lesson-card soon" href="turtle6.html">
+        <div class="lesson-top">
+          <span class="lesson-num">6</span>
+          <span class="status-pill soon">Скоро · необязательный</span>
+        </div>
+        <h3>Презентация проектов</h3>
+        <p class="desc">Покажешь свою работу классу, объяснишь команды и решения — и посмотришь, что получилось у других исследователей. Это твой момент славы! 🌟</p>
+        <div class="tag-row"><span class="tag">презентация</span><span class="tag">защита проекта</span></div>
+        <span class="lesson-cta">Открыть рабочий лист →</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ===== КАК ПРОХОДИТ УРОК ===== -->
+  <section aria-labelledby="flow-title">
+    <div class="section-head">
+      <h2 id="flow-title">Как проходит каждый урок</h2>
+      <p class="subtitle">Один урок = 40 минут и четыре простых шага</p>
+    </div>
+    <div class="flow">
+      <div class="card flow-step">
+        <span class="flow-num">1</span>
+        <h3>Теория</h3>
+        <p>Читаешь короткое объяснение с картинками и примерами — всё понятно даже без опыта.</p>
+        <span class="flow-time">~10 мин</span>
+      </div>
+      <div class="card flow-step">
+        <span class="flow-num">2</span>
+        <h3>Проверка</h3>
+        <p>Отвечаешь на 5 вопросов и сразу видишь, где было верно, а где стоит перечитать.</p>
+        <span class="flow-time">~5 мин</span>
+      </div>
+      <div class="card flow-step">
+        <span class="flow-num">3</span>
+        <h3>Практика</h3>
+        <p>Рисуешь в тренажёре черепашки прямо в браузере: выполняешь задания по образцу и придумываешь свои.</p>
+        <span class="flow-time">~15 мин</span>
+      </div>
+      <div class="card flow-step">
+        <span class="flow-num">4</span>
+        <h3>Мини-проект</h3>
+        <p>Оформляешь итог урока: код + рисунок, сохраняешь рабочий лист в PDF и отправляешь учителю.</p>
+        <span class="flow-time">~10 мин</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ЗАМЕТКА УЧИТЕЛЮ ===== -->
+  <section aria-labelledby="teacher-title">
+    <div class="card teacher-note" style="margin-top:32px">
+      <h2 id="teacher-title">👩‍🏫 Заметки</h2>
+      <p>Рабочие листы работают прямо в браузере — установка Python не требуется, но при наличии ПК с PyCharm/IDLE можно дублировать задания в настоящей среде. Итоговый продукт курса — индивидуальный мини-проект «Графический рисунок в Turtle» (открытка, узор, персонаж, пейзаж, эмблема).</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== ПОДВАЛ ===== -->
+<footer class="footer">
+  <p>Курс внеурочной деятельности «Я — исследователь: первые шаги в программировании» · 5–6 класс</p>
+  <p>Подготовлено с <span class="heart" aria-hidden="true">♥</span> учителем информатики · <span id="year"></span></p>
+</footer>
+
+<script>
+'use strict';
+
+/* Текущий год в подвале */
+(function(){
+  var y = document.getElementById('year');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+
+/* ============================================================
+   АНИМАЦИЯ ЧЕРЕПАШКИ В ГЕРОЕ
+   Рисует фигуры по очереди, как в тренажёре урока.
+   При prefers-reduced-motion — статичный квадрат без анимации.
+============================================================ */
+(function(){
+  var cv = document.getElementById('hero-canvas');
+  if (!cv || !cv.getContext) return;
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  var CENTER_X = W/2, CENTER_Y = H/2;
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Фигуры: [число сторон, длина шага, угол поворота, цвет, толщина] */
+  var SHAPES = [
+    { sides:4, step:58, turn:90,  color:'#0071e3', width:3 },   // квадрат
+    { sides:5, step:62, turn:144, color:'#ff9500', width:3 },   // звезда
+    { sides:3, step:64, turn:120, color:'#34c759', width:3 },   // треугольник
+    { sides:6, step:38, turn:60,  color:'#af52de', width:3 }    // шестиугольник
+  ];
+
+  var segments = [];
+  var turtle = { x:CENTER_X, y:CENTER_Y, h:-90 }; // смотрит вверх
+  var shapeIdx = 0, opIdx = 0, ops = [], timer = null;
+
+  /* Превращаем фигуру в список операций (шаг / поворот) */
+  function buildOps(shape){
+    var list = [];
+    for (var i=0;i<shape.sides;i++){
+      list.push({ t:'fd', d:shape.step });
+      list.push({ t:'turn', a:shape.turn });
+    }
+    return list;
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    /* мягкая сетка */
+    ctx.strokeStyle = '#f0f0f2'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var g=25; g<W; g+=25){
+      ctx.moveTo(g+.5,0); ctx.lineTo(g+.5,H);
+      ctx.moveTo(0,g+.5); ctx.lineTo(W,g+.5);
+    }
+    ctx.stroke();
+    /* линии рисунка */
+    ctx.lineCap = 'round';
+    for (var i=0;i<segments.length;i++){
+      var s = segments[i];
+      ctx.strokeStyle = s.c; ctx.lineWidth = s.w;
+      ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
+    }
+    /* черепашка */
+    ctx.save();
+    ctx.translate(turtle.x, turtle.y);
+    ctx.rotate(turtle.h * Math.PI / 180);
+    ctx.fillStyle = '#34c759';
+    ctx.strokeStyle = '#248a3d';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(3,0); ctx.lineTo(11,0); ctx.stroke();
+    ctx.restore();
+  }
+
+  function move(dist, color, width){
+    var rad = turtle.h * Math.PI / 180;
+    var nx = turtle.x + dist * Math.cos(rad);
+    var ny = turtle.y + dist * Math.sin(rad);
+    segments.push({ x1:turtle.x, y1:turtle.y, x2:nx, y2:ny, c:color, w:width });
+    turtle.x = nx; turtle.y = ny;
+  }
+
+  function startShape(){
+    var shape = SHAPES[shapeIdx % SHAPES.length];
+    ops = buildOps(shape);
+    opIdx = 0;
+    segments = [];
+    /* стартуем чуть ниже центра, чтобы фигура была посередине */
+    turtle = { x:CENTER_X, y:CENTER_Y + (shape.turn === 90 ? 29 : shape.turn === 120 ? 18 : 0), h:-90 };
+    draw();
+    timer = setTimeout(tick, 260);
+  }
+
+  function tick(){
+    var shape = SHAPES[shapeIdx % SHAPES.length];
+    if (opIdx >= ops.length){
+      /* пауза, затем следующая фигура */
+      timer = setTimeout(function(){
+        shapeIdx++;
+        startShape();
+      }, 1400);
+      return;
+    }
+    var op = ops[opIdx++];
+    if (op.t === 'fd') move(op.d, shape.color, shape.width);
+    else turtle.h += op.a;
+    draw();
+    timer = setTimeout(tick, 230);
+  }
+
+  /* Статичный режим: просто рисуем один квадрат целиком */
+  function drawStatic(){
+    var shape = SHAPES[0];
+    segments = [];
+    turtle = { x:CENTER_X, y:CENTER_Y + 29, h:-90 };
+    var list = buildOps(shape);
+    for (var i=0;i<list.length;i++){
+      var op = list[i];
+      if (op.t === 'fd') move(op.d, shape.color, shape.width);
+      else turtle.h += op.a;
+    }
+    draw();
+  }
+
+  if (reduced){
+    drawStatic();
+  } else {
+    startShape();
+    /* Останавливаем анимацию, когда вкладка не видна — экономим ресурсы */
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden){
+        clearTimeout(timer);
+      } else {
+        clearTimeout(timer);
+        timer = setTimeout(tick, 230);
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
