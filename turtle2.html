@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Урок 2 · Алгоритмы рисования — Я — исследователь: рисуем кодом</title>
+<style>
+/* ===== ПЕРЕМЕННЫЕ (единый стиль курса) ===== */
+:root{
+  --bg:#f5f5f7;
+  --card:#ffffff;
+  --text:#1d1d1f;
+  --muted:#6e6e73;
+  --accent:#0071e3;
+  --accent-hover:#0077ed;
+  --green:#34c759;
+  --green-dark:#248a3d;
+  --red:#ff3b30;
+  --line:#e8e8ed;
+  --line-soft:#f0f0f2;
+  --radius:18px;
+  --shadow:0 1px 3px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:760px;margin:0 auto;padding:16px 16px 56px}
+
+/* ===== ТИПОГРАФИКА ===== */
+h1{font-size:clamp(24px,5.5vw,32px);letter-spacing:-.02em;margin:0 0 8px;line-height:1.2}
+h1:focus{outline:none}
+h2{font-size:18px;margin:0 0 8px;letter-spacing:-.01em}
+h3{font-size:16px;margin:0 0 6px}
+.subtitle{color:var(--muted);margin:0 0 20px;font-size:16px}
+.muted{color:var(--muted);font-size:14px}
+p{margin:0 0 10px}
+b{font-weight:650}
+code{font-family:var(--mono);font-size:.92em;background:#f0f0f2;border-radius:5px;padding:1px 5px}
+
+/* ===== ВЕРХНЯЯ ПАНЕЛЬ / ШАГИ ===== */
+.topbar{
+  position:sticky;top:0;z-index:10;
+  background:rgba(245,245,247,.85);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{max-width:760px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.lesson-badge{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;text-decoration:none}
+.lesson-badge:hover{color:var(--accent)}
+.stepper{list-style:none;display:flex;gap:14px;margin:0;padding:0}
+.step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.step .dot{
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:#e3e3e8;color:var(--muted);font-size:12px;font-weight:600;flex:none;
+}
+.step.current .dot{background:var(--accent);color:#fff}
+.step.current{color:var(--text);font-weight:600}
+.step.done .dot{background:var(--green);color:#fff}
+.step-label{display:none}
+@media(min-width:560px){.step-label{display:inline}}
+
+/* ===== КАРТОЧКИ ===== */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow);margin-bottom:16px;
+}
+.card.tinted{background:#f0f7ff}
+.screen{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===== КНОПКИ ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:12px 22px;border-radius:12px;border:none;
+  font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;
+  transition:background .15s ease,transform .1s ease,opacity .15s ease;
+  text-decoration:none;
+}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-secondary{background:#e8e8ed;color:var(--text)}
+.btn-secondary:hover{background:#dcdce2}
+.btn-ghost{background:transparent;color:var(--accent);border:1px solid #d2d2d7}
+.btn-ghost:hover{background:#f0f7ff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.actions .btn{flex:1 1 180px}
+.back-link{
+  background:none;border:none;color:var(--accent);font-size:15px;font-weight:600;
+  font-family:inherit;cursor:pointer;padding:10px 4px;min-height:44px;margin-bottom:4px;
+}
+.back-link:hover{text-decoration:underline}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,label.opt:focus-within{
+  outline:3px solid rgba(0,113,227,.4);outline-offset:2px;border-radius:8px;
+}
+
+/* ===== ФОРМЫ ===== */
+.field{margin-bottom:18px}
+.field label,.lbl{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text)}
+input[type="text"],select,textarea{
+  width:100%;padding:12px 14px;min-height:44px;font-size:16px;font-family:inherit;
+  border:1px solid #d2d2d7;border-radius:12px;background:#fff;color:var(--text);
+}
+input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(0,113,227,.2)}
+textarea{font-family:var(--mono);font-size:14px;line-height:1.6;resize:vertical}
+.err{color:var(--red);font-size:14px;margin:6px 0 0}
+.start-card{text-align:center;padding:32px 24px}
+.logo{font-size:56px;line-height:1;margin-bottom:12px}
+.start-card form{text-align:left;margin-top:20px}
+.saved-note{
+  background:#f0f7ff;border:1px solid #cde5ff;border-radius:12px;
+  padding:12px 14px;font-size:14px;margin-top:16px;text-align:left;
+}
+.home-link{font-size:14px;color:var(--muted);text-decoration:none;display:inline-block;margin-top:14px}
+.home-link:hover{color:var(--accent);text-decoration:underline}
+
+/* ===== КОД ===== */
+pre.code{
+  background:#f5f5f7;border:1px solid var(--line);border-radius:12px;
+  padding:14px;overflow-x:auto;margin:0 0 12px;
+  font-family:var(--mono);font-size:14px;line-height:1.6;color:#1d1d1f;
+}
+.code-cap{font-size:13px;color:var(--muted);margin:0 0 8px}
+
+/* ===== ТАБЛИЦА КОМАНД ===== */
+.ref-table{width:100%;border-collapse:collapse;font-size:14px}
+.ref-table td{padding:9px 6px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td:first-child{font-family:var(--mono);color:var(--accent);white-space:nowrap;font-weight:600}
+
+/* ===== ТЕСТ ===== */
+.quiz-card{padding:18px 20px}
+.q-title{display:flex;gap:10px;align-items:flex-start;font-size:16px;margin-bottom:12px}
+.q-num{
+  flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+label.opt{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:12px 14px;border:1px solid #d2d2d7;border-radius:12px;
+  min-height:44px;cursor:pointer;margin-bottom:8px;font-size:15px;
+  transition:border-color .15s ease,background .15s ease;background:#fff;
+}
+label.opt:hover{border-color:#b8b8be}
+label.opt input{margin-top:3px;accent-color:var(--accent);flex:none;width:18px;height:18px}
+label.opt.correct{border-color:var(--green);background:#f0fbf3}
+label.opt.wrong{border-color:var(--red);background:#fff5f5}
+label.opt.disabled{cursor:default}
+.explain{font-size:14px;border-radius:10px;padding:10px 12px;margin:10px 0 0}
+.explain.ok{background:#f0fbf3;color:var(--green-dark)}
+.explain.bad{background:#fff5f5;color:#c9302c}
+.score-banner{
+  text-align:center;font-size:17px;background:#f0f7ff;border:1px solid #cde5ff;
+}
+
+/* ===== ТРЕНАЖЁР ===== */
+.sim-wrap{display:flex;flex-direction:column;gap:14px}
+#sim-canvas{
+  width:100%;max-width:320px;height:auto;aspect-ratio:1/1;
+  border:1px solid var(--line);border-radius:16px;background:#fff;
+  display:block;margin:0 auto;
+}
+.sim-controls{display:flex;gap:10px;flex-wrap:wrap}
+.sim-controls .btn{flex:1 1 130px;padding:10px 14px;font-size:15px}
+.sim-speed{display:flex;align-items:center;gap:10px}
+.sim-speed label{font-size:14px;font-weight:600;white-space:nowrap;margin:0}
+.sim-speed select{width:auto;flex:1;min-width:150px}
+.status{font-size:14px;min-height:22px;margin:0;color:var(--muted)}
+.status-err{color:var(--red)}
+.status-ok{color:var(--green-dark);font-weight:600}
+details.help{background:#f5f5f7;border-radius:12px;padding:4px 14px;margin:0}
+details.help summary{cursor:pointer;font-weight:600;font-size:15px;padding:10px 0;min-height:44px}
+details.hint{background:#fffbeb;border-radius:12px;padding:4px 14px;margin-top:8px}
+details.hint summary{cursor:pointer;font-weight:600;font-size:14px;color:#8a6d1a;padding:10px 0;min-height:44px}
+details.hint pre.code{margin:8px 0 12px}
+
+/* ===== ЗАДАНИЯ ===== */
+.task{display:flex;gap:12px;margin-bottom:14px}
+.task:last-child{margin-bottom:0}
+.task-body{flex:1;min-width:0}
+.task-num{
+  flex:none;width:30px;height:30px;border-radius:10px;background:#f0f7ff;color:var(--accent);
+  font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.task h3{margin-bottom:2px}
+.task p{margin:0;font-size:14px;color:var(--muted)}
+
+/* ===== ПРОЕКТ ===== */
+.steps-list{margin:0 0 4px;padding-left:20px;font-size:15px}
+.steps-list li{margin-bottom:8px}
+.shot-img{max-width:100%;border-radius:12px;border:1px solid var(--line);display:block;margin-bottom:8px}
+.shot-cap{font-size:13px;color:var(--muted);margin:0 0 10px}
+input[type="file"]{font-size:15px;max-width:100%}
+input[type="file"]::file-selector-button{
+  min-height:40px;padding:8px 16px;border-radius:10px;border:1px solid #d2d2d7;
+  background:#fff;font-family:inherit;font-size:14px;font-weight:600;color:var(--accent);
+  cursor:pointer;margin-right:12px;
+}
+.btn-from-sim{margin-top:10px;min-height:40px;padding:8px 16px;font-size:14px}
+
+/* ===== ИТОГ ===== */
+.result-hero{text-align:center;padding:28px 20px}
+.result-total{font-size:44px;font-weight:700;letter-spacing:-.02em;margin:4px 0}
+.result-rating{font-size:17px;color:var(--text);margin:0 0 4px}
+.res-rows{margin:0;padding:0;list-style:none}
+.res-rows li{
+  display:flex;justify-content:space-between;gap:12px;
+  padding:11px 2px;border-bottom:1px solid var(--line-soft);font-size:15px;
+}
+.res-rows li:last-child{border-bottom:none}
+.res-rows .pts{font-weight:650;white-space:nowrap}
+.ok-mark{color:var(--green-dark)}
+.bad-mark{color:var(--red)}
+.lesson-nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.lesson-nav .btn{flex:1 1 180px}
+
+/* ===== ПЕЧАТЬ / PDF ===== */
+#print-report{display:none}
+.pr-h1{font-size:20px;margin:0 0 4px}
+.pr-sub{font-size:13px;color:#555;margin:0 0 14px}
+.pr-meta{font-size:14px;margin:0 0 14px;line-height:1.7}
+.pr-h2{font-size:16px;margin:18px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+.pr-quiz{font-size:13px;padding-left:18px;margin:0}
+.pr-quiz li{margin-bottom:6px}
+.pr-code{
+  font-family:var(--mono);font-size:12px;background:#f5f5f5;border:1px solid #ddd;
+  border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;
+  page-break-inside:avoid;
+}
+.pr-img{max-width:100%;max-height:420px;border:1px solid #ddd;border-radius:6px;page-break-inside:avoid}
+.pr-total{font-size:15px;margin-top:14px}
+@media print{
+  body{background:#fff}
+  .app-ui{display:none!important}
+  #print-report{display:block;padding:0 4mm}
+  @page{margin:12mm}
+}
+</style>
+</head>
+<body>
+
+<div id="app" class="app-ui"></div>
+<div id="print-report" aria-hidden="true"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   КОНСТАНТЫ
+============================================================ */
+var LS_KEY = 'turtle_lesson2_v1';
+
+var COURSE_NAME = '«Я — исследователь: первые шаги в программировании»';
+var LESSON_TITLE = 'Алгоритмы рисования';
+
+var STEPS = ['Теория','Проверка','Практика','Итог'];
+
+var QUIZ = [
+  {
+    q: 'Что такое алгоритм?',
+    options: [
+      'Пошаговый план действий, который приводит к цели',
+      'Такая машина для рисования',
+      'Очень быстрый компьютер'
+    ],
+    correct: 0,
+    explain: 'Алгоритм — это последовательность шагов для исполнителя. Как рецепт пирога или план уборки комнаты: шаг за шагом — и цель достигнута!'
+  },
+  {
+    q: 'Почему порядок команд в программе очень важен?',
+    options: [
+      'Черепашка сама догадается, что рисовать сначала',
+      'Черепашка выполняет команды строго по очереди — поменяешь порядок, и рисунок изменится',
+      'Порядок важен только для красивых рисунков'
+    ],
+    correct: 1,
+    explain: 'Исполнитель не догадывается и не фантазирует: он делает команды ровно в том порядке, в котором они записаны. Переставил две команды — получил другой рисунок.'
+  },
+  {
+    q: 'Тебе нужно нарисовать дом с крышей и окном. Что поможет справиться?',
+    options: [
+      'Разбить рисунок на простые части: квадрат, треугольник, маленькие квадратики',
+      'Нарисовать весь дом одной командой',
+      'Рисовать линии случайным образом'
+    ],
+    correct: 0,
+    explain: 'Это приём «от простого к сложному»: сложная картинка собирается из простых фигур, а для каждой фигуры пишется свой маленький алгоритм.'
+  },
+  {
+    q: 'Что изменится, если команду width(2) заменить на width(8)?',
+    options: [
+      'Линия станет длиннее',
+      'Линия станет толще',
+      'Черепашка будет двигаться быстрее'
+    ],
+    correct: 1,
+    explain: 'width — это параметр «толщина линии». Чем больше число, тем толще линия. А длину задаёт команда forward.'
+  },
+  {
+    q: 'Что программисты обычно делают ПЕРЕД тем, как писать код сложного рисунка?',
+    options: [
+      'Составляют эскиз и продумывают алгоритм — из каких шагов и фигур состоит рисунок',
+      'Сразу пишут код и надеются на удачу',
+      'Удаляют все старые программы'
+    ],
+    correct: 0,
+    explain: 'Сначала план и эскиз — потом код. Так делают все программисты: это экономит время и помогает не запутаться в шагах.'
+  }
+];
+
+/* Цвета черепашки (английские + русские названия) */
+var COLOR_MAP = {
+  'black':'#1d1d1f','чёрный':'#1d1d1f','черный':'#1d1d1f',
+  'red':'#ff3b30','красный':'#ff3b30',
+  'orange':'#ff9500','оранжевый':'#ff9500',
+  'yellow':'#e6b800','жёлтый':'#e6b800','желтый':'#e6b800',
+  'green':'#34c759','зелёный':'#34c759','зеленый':'#34c759',
+  'blue':'#007aff','синий':'#007aff',
+  'skyblue':'#5ac8fa','голубой':'#5ac8fa',
+  'purple':'#af52de','фиолетовый':'#af52de',
+  'pink':'#ff2d55','розовый':'#ff2d55',
+  'brown':'#a2845e','коричневый':'#a2845e',
+  'gray':'#8e8e93','grey':'#8e8e93','серый':'#8e8e93',
+  'white':'#ffffff','белый':'#ffffff'
+};
+
+/* Команды, которые тренажёр молча пропускает (служебные строки Python) */
+var IGNORE_CMDS = ['shape','speed','hideturtle','showturtle','done','exitonclick',
+  'screensize','setup','title','bgcolor','tracer','delay'];
+
+/* Скорости анимации (мс на одну команду) */
+var SPEEDS = { slow: 520, normal: 280, fast: 90 };
+
+var SAMPLE_CODE =
+'# Алгоритм «Прямоугольник»\n' +
+'color blue\n' +
+'width 3\n' +
+'forward 120\n' +
+'right 90\n' +
+'forward 60\n' +
+'right 90\n' +
+'forward 120\n' +
+'right 90\n' +
+'forward 60';
+
+var HINT_LETTER_CODE =
+'# Буква «Т»\n' +
+'width 6\n' +
+'forward 60      # верхняя перекладина\n' +
+'penup\n' +
+'backward 30     # вернуться в середину (не рисуя)\n' +
+'right 90\n' +
+'pendown\n' +
+'forward 70      # ножка буквы';
+
+var HINT_HOUSE_CODE =
+'# Домик: стена-квадрат + крыша-треугольник\n' +
+'width 3\n' +
+'penup\n' +
+'backward 35     # начать левее центра\n' +
+'pendown\n' +
+'# стена\n' +
+'color brown\n' +
+'forward 70\n' +
+'left 90\n' +
+'forward 70\n' +
+'left 90\n' +
+'forward 70\n' +
+'left 90\n' +
+'forward 70\n' +
+'left 90\n' +
+'# крыша\n' +
+'penup\n' +
+'left 90\n' +
+'forward 70      # перейти в верхний угол стены\n' +
+'pendown\n' +
+'color red\n' +
+'right 90\n' +
+'forward 70\n' +
+'left 120\n' +
+'forward 70\n' +
+'left 120\n' +
+'forward 70';
+
+var THEORY_PARAMS_CODE =
+'import turtle\n' +
+'\n' +
+'t = turtle.Turtle()\n' +
+'t.color("red")     # параметр: цвет линии\n' +
+'t.width(5)         # параметр: толщина линии\n' +
+'t.speed(3)         # параметр: скорость рисования\n' +
+'t.forward(100)\n' +
+'t.left(90)\n' +
+'t.forward(60)';
+
+var THEORY_ALGO_CODE =
+'АЛГОРИТМ «Домик»\n' +
+'1. Нарисовать квадрат — это стена.\n' +
+'2. Поднять фломастер и перейти в верхний угол стены.\n' +
+'3. Опустить фломастер и нарисовать треугольник — это крыша.\n' +
+'4. Любоваться результатом! 🏠';
+
+/* ============================================================
+   СОСТОЯНИЕ
+============================================================ */
+function freshState(){
+  return {
+    screen: 'start',
+    name: '',
+    klass: '',
+    quiz: { answers: [null,null,null,null,null], checked: false, score: 0 },
+    project: { code: '', shotName: '', hasShot: false },
+    shotUrl: null,          // не сохраняется (blob живёт только в сессии)
+    simCode: ''
+  };
+}
+var state = freshState();
+var savedData = null;       // данные из localStorage при старте
+
+/* Состояние тренажёра (не сохраняется) */
+var sim = {
+  segments: [],
+  turtle: { x:150, y:150, h:0, pen:true, color:'#1d1d1f', width:2 },
+  running: false, timer: null, ops: [], idx: 0, delay: 280
+};
+
+/* ============================================================
+   СОХРАНЕНИЕ / ЗАГРУЗКА ПРОГРЕССА
+============================================================ */
+function save(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      screen: state.screen, name: state.name, klass: state.klass,
+      quiz: state.quiz,
+      project: { code: state.project.code, shotName: state.project.shotName, hasShot: state.project.hasShot },
+      simCode: state.simCode
+    }));
+  }catch(e){ /* приватный режим — просто не сохраняем */ }
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    var d = JSON.parse(raw);
+    if (d && d.screen === 'project') d.screen = 'practice'; // экраны объединены
+    return d;
+  }catch(e){ return null; }
+}
+function clearSaved(){
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+}
+
+/* ============================================================
+   УТИЛИТЫ
+============================================================ */
+function el(id){ return document.getElementById(id); }
+function debounce(fn, ms){
+  var t = null;
+  return function(){
+    var args = arguments, self = this;
+    clearTimeout(t);
+    t = setTimeout(function(){ fn.apply(self, args); }, ms);
+  };
+}
+function firstName(){
+  var n = state.name.trim().split(/\s+/);
+  return n.length ? n[0] : '';
+}
+
+/* ============================================================
+   ПОДСЧЁТ БАЛЛОВ
+============================================================ */
+function computeScore(){
+  var correct = 0;
+  for (var i=0;i<QUIZ.length;i++){
+    if (state.quiz.answers[i] === QUIZ[i].correct) correct++;
+  }
+  var quizPoints = state.quiz.checked ? correct*2 : 0;               // макс 10
+  var codePoints = state.project.code.trim().length >= 10 ? 5 : 0;   // макс 5
+  var shotPoints = state.project.hasShot ? 5 : 0;                    // макс 5
+  var total = quizPoints + codePoints + shotPoints;                  // макс 20
+  return {
+    correct: correct, quizPoints: quizPoints,
+    codePoints: codePoints, shotPoints: shotPoints,
+    total: total, percent: Math.round(total/20*100)
+  };
+}
+function ratingText(total){
+  if (total >= 18) return 'Отлично! Твои алгоритмы работают как часы! 🏆';
+  if (total >= 13) return 'Хорошо! Ещё немного практики — и будет идеально 👍';
+  return 'Неплохо для начала! Загляни в теорию и попробуй ещё раз 📚';
+}
+
+/* ============================================================
+   ШАПКА С ШАГАМИ
+============================================================ */
+function headerHTML(){
+  if (state.screen === 'start') return '';
+  var order = { theory:0, quiz:1, practice:2, result:3 };
+  var idx = order[state.screen];
+  var h = '<header class="topbar"><div class="topbar-inner">';
+  h += '<a class="lesson-badge" href="index.html" title="К списку уроков">🐢 Урок 2 · Алгоритмы</a>';
+  h += '<ol class="stepper" aria-label="Прогресс урока">';
+  for (var i=0;i<STEPS.length;i++){
+    var cls = 'step' + (i < idx ? ' done' : '') + (i === idx ? ' current' : '');
+    h += '<li class="' + cls + '"' + (i === idx ? ' aria-current="step"' : '') + '>';
+    h += '<span class="dot">' + (i < idx ? '✓' : (i+1)) + '</span>';
+    h += '<span class="step-label">' + STEPS[i] + '</span></li>';
+  }
+  h += '</ol></div></header>';
+  return h;
+}
+function backHTML(){
+  return '<button class="back-link" id="btn-back" type="button">← Назад</button>';
+}
+
+/* ============================================================
+   ЭКРАН: СТАРТ
+============================================================ */
+function startHTML(){
+  var hasSaved = !!(savedData && savedData.name && savedData.screen && savedData.screen !== 'start');
+  var h = '<section class="screen">';
+  h += '<div class="card start-card">';
+  h += '<div class="logo" aria-hidden="true">🗺️</div>';
+  h += '<h1 id="screen-title" tabindex="-1">Урок 2: Алгоритмы рисования</h1>';
+  h += '<p class="subtitle">Курс «Я — исследователь: первые шаги в программировании» · 5–6 класс<br>';
+  h += 'Сегодня ты научишься составлять <b>алгоритмы</b> — пошаговые планы для черепашки — и рисовать с их помощью настоящие картины.<br>';
+  h += '<span class="muted">⏱ 40 минут</span></p>';
+  h += '<form id="start-form" novalidate>';
+  h += '<div class="field"><label for="f-name">Фамилия и имя</label>';
+  h += '<input id="f-name" type="text" maxlength="60" autocomplete="name" placeholder="Например: Иванова Мария">';
+  h += '<p class="err" id="e-name" hidden></p></div>';
+  h += '<div class="field"><label for="f-class">Класс</label>';
+  h += '<select id="f-class"><option value="">Выбери класс…</option>';
+  var classes = ['5.1','5.2','5.3','6.1','6.2','6.3'];
+  for (var i=0;i<classes.length;i++){
+    h += '<option value="' + classes[i] + '">' + classes[i] + '</option>';
+  }
+  h += '</select><p class="err" id="e-class" hidden></p></div>';
+  if (hasSaved){
+    h += '<div class="actions"><button class="btn btn-primary" type="button" id="btn-continue">▶ Продолжить урок</button>';
+    h += '<button class="btn btn-ghost" type="submit">Начать заново</button></div>';
+    h += '<div class="saved-note">💾 Найден сохранённый прогресс: можно продолжить с места остановки. Рисунок мини-проекта нужно будет прикрепить заново — браузер не хранит картинки.</div>';
+  } else {
+    h += '<div class="actions"><button class="btn btn-primary" type="submit">Начать урок →</button></div>';
+  }
+  h += '</form>';
+  h += '<a class="home-link" href="index.html">← Все уроки курса</a>';
+  h += '</div></section>';
+  return h;
+}
+
+function setupStart(){
+  var form = el('start-form');
+  var nameInput = el('f-name');
+  var classInput = el('f-class');
+  if (savedData && savedData.name){
+    nameInput.value = savedData.name;
+    classInput.value = savedData.klass || '';
+  }
+  nameInput.value = nameInput.value || state.name;
+  classInput.value = classInput.value || state.klass;
+
+  function validate(){
+    var ok = true;
+    var name = nameInput.value.trim();
+    var eName = el('e-name'), eClass = el('e-class');
+    eName.hidden = true; eClass.hidden = true;
+    if (name.length < 3 || !/[а-яёa-z]/i.test(name)){
+      eName.textContent = 'Напиши фамилию и имя (буквами, минимум 3 символа).';
+      eName.hidden = false; ok = false;
+    }
+    if (!classInput.value){
+      eClass.textContent = 'Выбери свой класс из списка.';
+      eClass.hidden = false; ok = false;
+    }
+    if (ok){ state.name = name; state.klass = classInput.value; }
+    return ok;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!validate()) return;
+    // «Начать заново»: сбрасываем прогресс ответов
+    clearSaved(); savedData = null;
+    state.quiz = { answers:[null,null,null,null,null], checked:false, score:0 };
+    state.project = { code:'', shotName:'', hasShot:false };
+    state.simCode = '';
+    if (state.shotUrl){ URL.revokeObjectURL(state.shotUrl); }
+    state.shotUrl = null;
+    state.screen = 'theory';
+    save(); render();
+  });
+
+  var btnContinue = el('btn-continue');
+  if (btnContinue){
+    btnContinue.addEventListener('click', function(){
+      if (!validate()) return;
+      state.quiz = savedData.quiz || state.quiz;
+      state.project = {
+        code: (savedData.project && savedData.project.code) || '',
+        shotName: (savedData.project && savedData.project.shotName) || '',
+        hasShot: false // картинка не восстанавливается
+      };
+      state.simCode = savedData.simCode || '';
+      state.screen = (savedData.screen && savedData.screen !== 'start') ? savedData.screen : 'theory';
+      save(); render();
+    });
+  }
+}
+
+/* ============================================================
+   ЭКРАН: ТЕОРИЯ
+============================================================ */
+function theoryHTML(){
+  var h = '<section class="screen">' + backHTML();
+  h += '<h1 id="screen-title" tabindex="-1">Теория <span id="hello-name"></span></h1>';
+  h += '<p class="subtitle">Прочитай внимательно — в конце будет короткая проверка. Это займёт ~10 минут.</p>';
+
+  h += '<div class="card"><h2>1. Что такое алгоритм? 🗺️</h2>';
+  h += '<p><b>Алгоритм</b> — это пошаговый план действий, который приводит к цели. Ты встречаешь алгоритмы каждый день: рецепт бутерброда, инструкция к LEGO, маршрут до школы.</p>';
+  h += '<p>Того, кто выполняет алгоритм, называют <b>исполнителем</b>. Наша черепашка — идеальный исполнитель: она не ленится и не фантазирует, а точно выполняет команду за командой.</p>';
+  h += '<p>Программа на Python — это тот же алгоритм, только записанный на языке, который понимает компьютер.</p></div>';
+
+  h += '<div class="card"><h2>2. Три правила хорошего алгоритма ✅</h2>';
+  h += '<p><b>1. Понятные команды.</b> Каждый шаг должен быть командой, которую исполнитель умеет выполнять. Черепашка не понимает «нарисуй красиво», но понимает <code>forward 70</code>.</p>';
+  h += '<p><b>2. Точный порядок.</b> Шаги выполняются строго по очереди. Поменяешь две команды местами — получишь совсем другой рисунок.</p>';
+  h += '<p><b>3. Есть результат.</b> Алгоритм должен заканчиваться и приводить к цели — готовому рисунку.</p>';
+  h += '<p class="code-cap">Алгоритмы можно записывать словами — такой план удобно составить до написания кода:</p>';
+  h += '<pre class="code">' + THEORY_ALGO_CODE + '</pre>';
+  h += '<p class="muted">Строки, начинающиеся с #, — комментарии. Так программисты записывают свои заметки и планы прямо в коде.</p></div>';
+
+  h += '<div class="card"><h2>3. Параметры команд 🎛</h2>';
+  h += '<p>У многих команд есть <b>параметры</b> — числа и значения в скобках, которые меняют результат. Команда одна — а рисунок разный!</p>';
+  h += '<table class="ref-table"><tbody>';
+  h += '<tr><td>forward(100)</td><td>параметр — длина шага. forward(30) — короткий шажок, forward(150) — длинный</td></tr>';
+  h += '<tr><td>right(90)</td><td>параметр — угол поворота. right(45) — плавный поворот, right(180) — разворот назад</td></tr>';
+  h += '<tr><td>color("red")</td><td>параметр — цвет линии</td></tr>';
+  h += '<tr><td>width(5)</td><td>параметр — толщина линии (от тонкой до жирной)</td></tr>';
+  h += '<tr><td>speed(3)</td><td>параметр — скорость рисования черепашки</td></tr>';
+  h += '</tbody></table>';
+  h += '<p class="code-cap" style="margin-top:12px">Пример программы с параметрами на Python:</p>';
+  h += '<pre class="code">' + THEORY_PARAMS_CODE + '</pre>';
+  h += '<p>Экспериментируй: поменяй одно число — и посмотри, как изменится рисунок. Так программисты <b>исследуют</b> свои программы! 🔬</p></div>';
+
+  h += '<div class="card"><h2>4. От простого к сложному 🏠</h2>';
+  h += '<p>Как нарисовать дом с крышей и окном? Не пытаться сделать всё сразу, а <b>разбить рисунок на простые фигуры</b>: стена — это квадрат, крыша — треугольник, окно — маленький квадратик, дым — линия.</p>';
+  h += '<p>Этот приём называется <b>«разбиение на части»</b>, и им пользуются все программисты: большую задачу делят на маленькие, решают каждую по отдельности — и собирают результат.</p>';
+  h += '<p>Перед кодом полезно нарисовать <b>эскиз</b> на бумаге и подписать, из каких фигур состоит картинка и в каком порядке их рисовать.</p></div>';
+
+  h += '<div class="card"><h2>5. Проверяй и исправляй 🔧</h2>';
+  h += '<p>Настоящий алгоритм проверяется так: <b>запусти программу и сравни рисунок с эскизом</b>. Совпало? Супер! Не совпало — найди шаг, где черепашка пошла не туда.</p>';
+  h += '<p>Частые ошибки: перепутал <code>left</code> и <code>right</code>, забыл <code>pendown</code> после <code>penup</code> (линия не рисуется), опечатка в названии команды или цвете. Поиск и исправление ошибок называется <b>отладкой</b> — это тоже часть работы программиста.</p></div>';
+
+  h += '<div class="actions"><button class="btn btn-primary" id="to-quiz" type="button">Далее — проверка знаний →</button></div>';
+  h += '</section>';
+  return h;
+}
+
+function setupTheory(){
+  var greet = el('hello-name');
+  if (greet && firstName()) greet.textContent = ', ' + firstName() + '! 👋';
+  el('to-quiz').addEventListener('click', function(){ state.screen = 'quiz'; save(); render(); });
+}
+
+/* ============================================================
+   ЭКРАН: ПРОВЕРКА ЗНАНИЙ (ТЕСТ)
+============================================================ */
+function quizHTML(){
+  var s = state.quiz;
+  var h = '<section class="screen">' + backHTML();
+  h += '<h1 id="screen-title" tabindex="-1">Проверь себя 🤓</h1>';
+  h += '<p class="subtitle">5 коротких вопросов по теории. Выбирай один ответ в каждом. За каждый верный ответ — 2 балла.</p>';
+  for (var i=0;i<QUIZ.length;i++){
+    var q = QUIZ[i];
+    h += '<div class="card quiz-card">';
+    h += '<h2 class="q-title"><span class="q-num">' + (i+1) + '</span><span>' + q.q + '</span></h2>';
+    h += '<div role="radiogroup" aria-label="Вопрос ' + (i+1) + '">';
+    for (var j=0;j<q.options.length;j++){
+      var cls = 'opt';
+      if (s.checked){
+        cls += ' disabled';
+        if (j === q.correct) cls += ' correct';
+        else if (s.answers[i] === j) cls += ' wrong';
+      }
+      h += '<label class="' + cls + '">';
+      h += '<input type="radio" name="q' + i + '" value="' + j + '"' +
+           (s.answers[i] === j ? ' checked' : '') + (s.checked ? ' disabled' : '') + '>';
+      h += '<span>' + q.options[j] + '</span></label>';
+    }
+    h += '</div>';
+    if (s.checked){
+      var ok = s.answers[i] === q.correct;
+      h += '<p class="explain ' + (ok ? 'ok' : 'bad') + '">' +
+           (ok ? '✔ Верно! ' : '✘ Неверно. ') + q.explain + '</p>';
+    }
+    h += '</div>';
+  }
+  if (s.checked){
+    h += '<div class="card score-banner">Правильных ответов: <b>' + s.score + ' из 5</b> · ' + (s.score*2) + ' баллов из 10</div>';
+    h += '<div class="actions">';
+    h += '<button class="btn btn-secondary" id="quiz-retry" type="button">↺ Ответить заново</button>';
+    h += '<button class="btn btn-primary" id="quiz-next" type="button">Далее — практика →</button>';
+    h += '</div>';
+  } else {
+    h += '<p class="err" id="quiz-err" hidden>Сначала ответь на все вопросы.</p>';
+    h += '<div class="actions"><button class="btn btn-primary" id="quiz-check" type="button">Проверить ответы</button></div>';
+  }
+  h += '</section>';
+  return h;
+}
+
+function setupQuiz(){
+  var s = state.quiz;
+  if (!s.checked){
+    for (var i=0;i<QUIZ.length;i++){
+      (function(idx){
+        var radios = document.querySelectorAll('input[name="q' + idx + '"]');
+        for (var k=0;k<radios.length;k++){
+          radios[k].addEventListener('change', function(){
+            state.quiz.answers[idx] = parseInt(this.value, 10);
+            el('quiz-err').hidden = true;
+            save();
+          });
+        }
+      })(i);
+    }
+    el('quiz-check').addEventListener('click', function(){
+      var unanswered = 0;
+      for (var j=0;j<QUIZ.length;j++){
+        if (state.quiz.answers[j] === null) unanswered++;
+      }
+      if (unanswered > 0){
+        var err = el('quiz-err');
+        err.hidden = false;
+        err.textContent = 'Осталось ответить на ' + unanswered + ' вопрос(ов). Выбери вариант в каждой карточке.';
+        return;
+      }
+      var score = 0;
+      for (var m=0;m<QUIZ.length;m++){
+        if (state.quiz.answers[m] === QUIZ[m].correct) score++;
+      }
+      state.quiz.score = score;
+      state.quiz.checked = true;
+      save(); render();
+    });
+  } else {
+    el('quiz-retry').addEventListener('click', function(){
+      state.quiz = { answers:[null,null,null,null,null], checked:false, score:0 };
+      save(); render();
+    });
+    el('quiz-next').addEventListener('click', function(){
+      state.screen = 'practice'; save(); render();
+    });
+  }
+}
+
+/* ============================================================
+   ЭКРАН: ПРАКТИКА + МИНИ-ПРОЕКТ (ОБЪЕДИНЁННЫЙ)
+============================================================ */
+function practiceHTML(){
+  var h = '<section class="screen">' + backHTML();
+  h += '<h1 id="screen-title" tabindex="-1">Практика и мини-проект 🎮</h1>';
+  h += '<p class="subtitle">Составляй алгоритмы и запускай их прямо здесь. Если застрял — в каждом задании есть подсказка с готовым кодом.</p>';
+
+  h += '<div class="card"><h2>Твои задания (~20 минут)</h2>';
+
+  h += '<div class="task"><span class="task-num">1</span><div class="task-body"><h3>Прямоугольник</h3>';
+  h += '<p>Составь алгоритм прямоугольника 120 × 60. Подсказка: у прямоугольника противоположные стороны равны, а углы все прямые (90°). Нажми «Пример: прямоугольник», чтобы увидеть готовый алгоритм.</p>';
+  h += '<details class="hint"><summary>💡 Показать подсказку</summary><pre class="code"># Алгоритм «Прямоугольник»:\n# 1. Длинная сторона 120 → поворот 90°\n# 2. Короткая сторона 60  → поворот 90°\n# 3. Повторить ещё раз\n# Всего 8 команд!</pre></details>';
+  h += '</div></div>';
+
+  h += '<div class="task"><span class="task-num">2</span><div class="task-body"><h3>Буква «Т»</h3>';
+  h += '<p>Нарисуй букву «Т»: сначала верхнюю перекладину, затем вернись в её середину (не рисуя!) и опусти ножку вниз. Здесь понадобятся <code>penup</code> и <code>pendown</code>.</p>';
+  h += '<details class="hint"><summary>💡 Показать подсказку</summary><pre class="code">' + HINT_LETTER_CODE + '</pre></details>';
+  h += '</div></div>';
+
+  h += '<div class="task"><span class="task-num">3</span><div class="task-body"><h3>Домик из фигур 🏠</h3>';
+  h += '<p>Разбей рисунок на части, как учили в теории: стена — квадрат, крыша — треугольник. Сначала составь алгоритм словами (можно в комментариях #), потом напиши код. Попробуй добавить окно!</p>';
+  h += '<details class="hint"><summary>💡 Показать подсказку</summary><pre class="code">' + HINT_HOUSE_CODE + '</pre></details>';
+  h += '</div></div>';
+
+  h += '<div class="task"><span class="task-num">4</span><div class="task-body"><h3>Эксперимент с параметрами 🎛</h3>';
+  h += '<p>Возьми любой свой рисунок и измени параметры: другой <code>color</code>, толщину <code>width</code> и скорость внизу тренажёра. Сравни результаты — какой вариант выглядит лучше?</p>';
+  h += '</div></div>';
+
+  h += '<div class="task"><span class="task-num">★</span><div class="task-body"><h3>Мини-проект урока</h3>';
+  h += '<p>Придумай собственный рисунок <b>из простых фигур</b>: робот, ёлочка, машина, солнышко, кораблик… Сделай эскиз, разбей его на фигуры — и нарисуй в тренажёре. Оформь проект внизу страницы.</p>';
+  h += '</div></div>';
+  h += '</div>';
+
+  h += '<div class="card"><h2>Тренажёр черепашки 🐢</h2>';
+  h += '<div class="sim-wrap">';
+  h += '<canvas id="sim-canvas" width="300" height="300" role="img" aria-label="Поле, на котором черепашка рисует"></canvas>';
+  h += '<div class="sim-controls">';
+  h += '<button class="btn btn-primary" id="btn-run" type="button">▶ Запустить</button>';
+  h += '<button class="btn btn-secondary" id="btn-stop" type="button" disabled>■ Стоп</button>';
+  h += '<button class="btn btn-ghost" id="btn-sample" type="button">Пример: прямоугольник</button>';
+  h += '<button class="btn btn-ghost" id="btn-clear" type="button">Очистить</button>';
+  h += '<button class="btn btn-ghost" id="btn-download" type="button">📷 Скачать рисунок</button>';
+  h += '</div>';
+  h += '<div class="sim-speed"><label for="sim-speed">Скорость рисования</label>';
+  h += '<select id="sim-speed"><option value="slow">🐢 Медленная — внимательно следить</option><option value="normal" selected>🙂 Обычная</option><option value="fast">⚡ Турбо</option></select></div>';
+  h += '<div><label class="lbl" for="sim-code">Код программы</label>';
+  h += '<textarea id="sim-code" rows="8" spellcheck="false" aria-describedby="sim-status" placeholder="# Мой алгоритм&#10;forward 120&#10;right 90&#10;forward 60"></textarea></div>';
+  h += '<p class="status" id="sim-status" role="status" aria-live="polite"></p>';
+  h += '<details class="help"><summary>📖 Шпаргалка: команды черепашки</summary>';
+  h += '<table class="ref-table"><tbody>';
+  h += '<tr><td>forward 100</td><td>вперёд на 100 шагов (можно fd 100)</td></tr>';
+  h += '<tr><td>backward 50</td><td>назад на 50 шагов (bk 50)</td></tr>';
+  h += '<tr><td>right 90</td><td>поворот направо на 90° (rt 90)</td></tr>';
+  h += '<tr><td>left 45</td><td>поворот налево на 45° (lt 45)</td></tr>';
+  h += '<tr><td>penup / pendown</td><td>поднять / опустить фломастер</td></tr>';
+  h += '<tr><td>color red</td><td>цвет: red, blue, green, yellow, orange, purple, pink, brown, black… (можно по-русски: color красный)</td></tr>';
+  h += '<tr><td>width 3</td><td>толщина линии от 1 до 20</td></tr>';
+  h += '<tr><td>circle 50</td><td>нарисовать круг радиусом 50</td></tr>';
+  h += '<tr><td>home</td><td>вернуться в центр, смотреть направо</td></tr>';
+  h += '<tr><td>clear</td><td>стереть рисунок</td></tr>';
+  h += '<tr><td># комментарий</td><td>строки с # черепашка не выполняет — записывай туда шаги своего алгоритма</td></tr>';
+  h += '</tbody></table></details>';
+  h += '</div></div>';
+
+  h += '<div class="card tinted"><h2>Мини-проект «Рисунок из простых фигур» 🎨</h2>';
+  h += '<ol class="steps-list">';
+  h += '<li>Придумай идею рисунка: робот, ёлочка, машина, кораблик, солнышко с домиком — что угодно!</li>';
+  h += '<li>Составь эскиз (можно мысленно) и разбей рисунок на простые фигуры: квадраты, треугольники, круги, линии.</li>';
+  h += '<li>Напиши алгоритм в тренажёре выше — по частям: сначала одна фигура, потом другая. Комментарии # помогут не запутаться.</li>';
+  h += '<li>Запусти программу и сравни результат с эскизом. Что-то не так? Это отладка — найди шаг с ошибкой и исправь 🔧.</li>';
+  h += '<li>Нажми «📷 Скачать рисунок» — файл попадёт в загрузки (или сделай скриншот).</li>';
+  h += '<li>Перенеси код в поле ниже (кнопка «⬆ Вставить код из тренажёра» сделает это сама), прикрепи картинку и нажми «Завершить урок».</li>';
+  h += '</ol></div>';
+
+  h += '<div class="card"><label class="lbl" for="project-code">Итоговый код программы</label>';
+  h += '<textarea id="project-code" rows="8" spellcheck="false" placeholder="# Мой рисунок «Робот»\ncolor gray\nwidth 3\nforward 60\n..."></textarea>';
+  h += '<button class="btn btn-ghost btn-from-sim" id="btn-from-sim" type="button">⬆ Вставить код из тренажёра</button>';
+  h += '<p class="err" id="e-code" hidden></p></div>';
+
+  h += '<div class="card"><label class="lbl" for="shot-input">Рисунок (скачанный файл или скриншот)</label>';
+  h += '<input id="shot-input" type="file" accept="image/*" aria-describedby="shot-area">';
+  h += '<div id="shot-area" style="margin-top:12px"></div>';
+  h += '<p class="err" id="e-shot" hidden></p></div>';
+
+  h += '<div class="actions"><button class="btn btn-primary" id="btn-submit" type="button">Завершить урок ✓</button></div>';
+  h += '</section>';
+  return h;
+}
+
+/* ---------- Мини-интерпретатор команд (без eval!) ---------- */
+function toNum(v){
+  if (v === undefined || v === '') return null;
+  var n = Number(v);
+  return isFinite(n) ? n : null;
+}
+function parseProgram(text){
+  var lines = String(text).split('\n');
+  var ops = [];
+  for (var i=0;i<lines.length;i++){
+    var raw = lines[i].trim();
+    if (!raw) continue;
+    var line = raw.toLowerCase();
+    if (line.charAt(0) === '#') continue;              // комментарий
+    if (line.indexOf('import') === 0) continue;        // import turtle
+    line = line.replace(/t\s*\.\s*/g, '');             // t.forward → forward
+    if (/^[a-z_][a-z0-9_]*\s*=/.test(line)) continue;  // t = turtle.Turtle()
+    line = line.replace(/[(),]/g, ' ').replace(/['"]/g, ' ');
+    var parts = line.split(/\s+/).filter(Boolean);
+    if (!parts.length) continue;
+    var cmd = parts[0], arg = parts[1], ln = i+1;
+
+    if (ops.length >= 500){
+      return { ops:null, error:{ line:ln, text:'Слишком длинная программа (максимум 500 команд).' } };
+    }
+    function numErr(name){
+      return { ops:null, error:{ line:ln, text:'после ' + name + ' нужно написать число, например: ' + name + ' 100' } };
+    }
+    if (cmd === 'forward' || cmd === 'fd'){
+      var n1 = toNum(arg); if (n1 === null) return numErr(cmd);
+      ops.push({ t:'fd', d: Math.max(-1000, Math.min(1000, n1)) });
+    } else if (cmd === 'backward' || cmd === 'back' || cmd === 'bk'){
+      var n2 = toNum(arg); if (n2 === null) return numErr(cmd);
+      ops.push({ t:'fd', d: -Math.max(-1000, Math.min(1000, n2)) });
+    } else if (cmd === 'right' || cmd === 'rt'){
+      var a1 = toNum(arg); if (a1 === null) return numErr(cmd);
+      ops.push({ t:'turn', a:a1 });
+    } else if (cmd === 'left' || cmd === 'lt'){
+      var a2 = toNum(arg); if (a2 === null) return numErr(cmd);
+      ops.push({ t:'turn', a:-a2 });
+    } else if (cmd === 'penup' || cmd === 'pu' || cmd === 'up'){
+      ops.push({ t:'pen', v:false });
+    } else if (cmd === 'pendown' || cmd === 'pd' || cmd === 'down'){
+      ops.push({ t:'pen', v:true });
+    } else if (cmd === 'color' || cmd === 'pencolor'){
+      if (!arg) return { ops:null, error:{ line:ln, text:'после color напиши цвет, например: color red' } };
+      var c = COLOR_MAP[arg];
+      if (!c) return { ops:null, error:{ line:ln, text:'не знаю цвет «' + parts[1] + '». Попробуй: red, blue, green, yellow, orange, purple, pink, brown, black.' } };
+      ops.push({ t:'color', v:c });
+    } else if (cmd === 'width' || cmd === 'pensize'){
+      var w = toNum(arg); if (w === null) return numErr(cmd);
+      ops.push({ t:'width', v: Math.max(1, Math.min(20, w)) });
+    } else if (cmd === 'circle'){
+      var r = toNum(arg); if (r === null) return numErr('circle');
+      if (Math.abs(r) > 300) return { ops:null, error:{ line:ln, text:'слишком большой круг — радиус должен быть не больше 300' } };
+      ops.push({ t:'circle', r:r });
+    } else if (cmd === 'home'){
+      ops.push({ t:'home' });
+    } else if (cmd === 'clear'){
+      ops.push({ t:'clear' });
+    } else if (IGNORE_CMDS.indexOf(cmd) !== -1){
+      continue; // служебные команды Python пропускаем
+    } else {
+      return { ops:null, error:{ line:ln, text:'непонятная команда «' + parts[0] + '». Загляни в шпаргалку и проверь, правильно ли она написана.' } };
+    }
+  }
+  return { ops:ops, error:null };
+}
+
+/* ---------- Отрисовка поля ---------- */
+function simReset(){
+  sim.segments = [];
+  sim.turtle = { x:150, y:150, h:0, pen:true, color:'#1d1d1f', width:2 };
+  simDraw();
+}
+function simDraw(){
+  var cv = el('sim-canvas');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,300,300);
+  // сетка
+  ctx.strokeStyle = '#f0f0f2'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (var g=25; g<300; g+=25){
+    ctx.moveTo(g+.5,0); ctx.lineTo(g+.5,300);
+    ctx.moveTo(0,g+.5); ctx.lineTo(300,g+.5);
+  }
+  ctx.stroke();
+  // линии рисунка
+  ctx.lineCap = 'round';
+  for (var i=0;i<sim.segments.length;i++){
+    var s = sim.segments[i];
+    ctx.strokeStyle = s.c; ctx.lineWidth = s.w;
+    ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
+  }
+  // черепашка
+  var t = sim.turtle;
+  ctx.save();
+  ctx.translate(t.x, t.y);
+  ctx.rotate(t.h * Math.PI / 180);
+  ctx.fillStyle = '#34c759';
+  ctx.strokeStyle = '#248a3d';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(0,0,9,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(4,0); ctx.lineTo(12,0); ctx.stroke(); // куда смотрит
+  ctx.restore();
+}
+function simMove(dist){
+  var t = sim.turtle;
+  var rad = t.h * Math.PI / 180;
+  var nx = t.x + dist * Math.cos(rad);
+  var ny = t.y + dist * Math.sin(rad);
+  if (t.pen) sim.segments.push({ x1:t.x, y1:t.y, x2:nx, y2:ny, c:t.color, w:t.width });
+  t.x = nx; t.y = ny;
+}
+function applyOp(op){
+  var t = sim.turtle;
+  switch(op.t){
+    case 'fd': simMove(op.d); break;
+    case 'turn': t.h = (t.h + op.a) % 360; break;
+    case 'pen': t.pen = op.v; break;
+    case 'color': t.color = op.v; break;
+    case 'width': t.width = op.v; break;
+    case 'circle':
+      var steps = 36;
+      var seg = (2 * Math.PI * Math.abs(op.r)) / steps;
+      var dir = op.r >= 0 ? -10 : 10; // положительный радиус — против часовой
+      for (var i=0;i<steps;i++){ simMove(seg); t.h += dir; }
+      break;
+    case 'home': t.x = 150; t.y = 150; t.h = 0; break;
+    case 'clear': sim.segments = []; break;
+  }
+}
+function simSetButtons(){
+  var run = el('btn-run'), stop = el('btn-stop');
+  if (run) run.disabled = sim.running;
+  if (stop) stop.disabled = !sim.running;
+}
+function simCurrentDelay(){
+  var sel = el('sim-speed');
+  var base = SPEEDS[sel ? sel.value : 'normal'] || SPEEDS.normal;
+  if (sim.ops.length > 40) base = Math.max(60, Math.round(base * 0.4)); // длинные программы ускоряем
+  return base;
+}
+function simRun(){
+  if (sim.running) return;
+  var ta = el('sim-code');
+  var st = el('sim-status');
+  var res = parseProgram(ta.value);
+  if (res.error){
+    st.className = 'status status-err';
+    st.textContent = '⚠ Ошибка в строке ' + res.error.line + ': ' + res.error.text;
+    return;
+  }
+  if (!res.ops.length){
+    st.className = 'status status-err';
+    st.textContent = 'Программа пустая — напиши хотя бы одну команду 🙂';
+    return;
+  }
+  clearTimeout(sim.timer);
+  simReset();
+  sim.ops = res.ops; sim.idx = 0; sim.running = true;
+  sim.delay = simCurrentDelay();
+  simSetButtons();
+  st.className = 'status';
+  st.textContent = 'Выполняю программу…';
+  sim.timer = setTimeout(function tick(){
+    if (sim.idx >= sim.ops.length){
+      sim.running = false; simSetButtons();
+      st.className = 'status status-ok';
+      st.textContent = '🎉 Готово! Черепашка выполнила команд: ' + sim.ops.length + '. Сравни рисунок со своим эскизом!';
+      simDraw();
+      return;
+    }
+    applyOp(sim.ops[sim.idx++]);
+    simDraw();
+    sim.timer = setTimeout(tick, sim.delay);
+  }, sim.delay);
+}
+function simStop(){
+  clearTimeout(sim.timer);
+  if (sim.running){
+    sim.running = false;
+    simSetButtons();
+    var st = el('sim-status');
+    if (st){ st.className = 'status'; st.textContent = 'Остановлено.'; }
+  }
+}
+function simDownload(){
+  var cv = el('sim-canvas');
+  if (!cv) return;
+  var st = el('sim-status');
+  if (!sim.segments.length){
+    st.className = 'status status-err';
+    st.textContent = 'Пока нечего скачивать — сначала нарисуй что-нибудь 🙂';
+    return;
+  }
+  // переносим рисунок на белый фон и сохраняем как PNG
+  var tmp = document.createElement('canvas');
+  tmp.width = cv.width; tmp.height = cv.height;
+  var tctx = tmp.getContext('2d');
+  tctx.fillStyle = '#ffffff';
+  tctx.fillRect(0,0,tmp.width,tmp.height);
+  tctx.drawImage(cv,0,0);
+  var link = document.createElement('a');
+  link.download = 'moi-algoritm-risunok.png';
+  link.href = tmp.toDataURL('image/png');
+  link.click();
+  st.className = 'status status-ok';
+  st.textContent = '📷 Рисунок сохранён в загрузки! Теперь прикрепи его в мини-проекте ниже.';
+}
+
+/* ---------- Область рисунка ---------- */
+function renderShotArea(){
+  var a = el('shot-area');
+  if (!a) return;
+  while (a.firstChild) a.removeChild(a.firstChild);
+  if (state.project.hasShot && state.shotUrl){
+    var img = document.createElement('img');
+    img.src = state.shotUrl;
+    img.alt = 'Рисунок ученика';
+    img.className = 'shot-img';
+    var cap = document.createElement('p');
+    cap.className = 'shot-cap';
+    cap.textContent = '✔ Прикреплено: ' + state.project.shotName;
+    var rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'btn btn-ghost';
+    rm.textContent = 'Удалить рисунок';
+    rm.addEventListener('click', function(){
+      if (state.shotUrl) URL.revokeObjectURL(state.shotUrl);
+      state.shotUrl = null;
+      state.project.hasShot = false;
+      state.project.shotName = '';
+      var inp = el('shot-input'); if (inp) inp.value = '';
+      save(); renderShotArea();
+    });
+    a.appendChild(img); a.appendChild(cap); a.appendChild(rm);
+  } else {
+    var p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = state.project.shotName
+      ? 'Раньше был прикреплён файл «' + state.project.shotName + '», но браузер не хранит картинки — прикрепи рисунок заново.'
+      : 'Рисунок пока не прикреплён.';
+    a.appendChild(p);
+  }
+}
+
+function setupPractice(){
+  /* --- тренажёр --- */
+  var ta = el('sim-code');
+  ta.value = state.simCode || '';
+  simReset();
+  simSetButtons();
+  var saveSim = debounce(function(){ state.simCode = ta.value; save(); }, 400);
+  ta.addEventListener('input', saveSim);
+  el('btn-run').addEventListener('click', function(){ state.simCode = ta.value; save(); simRun(); });
+  el('btn-stop').addEventListener('click', simStop);
+  el('btn-download').addEventListener('click', simDownload);
+  el('btn-clear').addEventListener('click', function(){ simStop(); simReset(); var st = el('sim-status'); st.className='status'; st.textContent='Поле очищено. Можно рисовать заново!'; });
+  el('btn-sample').addEventListener('click', function(){
+    simStop();
+    ta.value = SAMPLE_CODE;
+    state.simCode = SAMPLE_CODE; save();
+    var st = el('sim-status'); st.className='status'; st.textContent='Я загрузил пример — прямоугольник. Нажми «▶ Запустить» и попробуй поменять параметры!';
+  });
+
+  /* --- мини-проект --- */
+  var codeTa = el('project-code');
+  codeTa.value = state.project.code;
+  var saveCode = debounce(function(){ state.project.code = codeTa.value; save(); }, 400);
+  codeTa.addEventListener('input', saveCode);
+
+  el('btn-from-sim').addEventListener('click', function(){
+    var simTa = el('sim-code');
+    state.simCode = simTa.value;
+    codeTa.value = simTa.value;
+    state.project.code = simTa.value;
+    save();
+    el('e-code').hidden = true;
+    var btn = el('btn-from-sim');
+    btn.textContent = '✔ Код вставлен!';
+    setTimeout(function(){ btn.textContent = '⬆ Вставить код из тренажёра'; }, 2000);
+  });
+
+  var shotInput = el('shot-input');
+  shotInput.addEventListener('change', function(){
+    var err = el('e-shot');
+    err.hidden = true;
+    var f = shotInput.files && shotInput.files[0];
+    if (!f) return;
+    if (!/^image\//.test(f.type)){
+      err.textContent = 'Можно прикрепить только картинку (PNG, JPG…). Попробуй ещё раз.';
+      err.hidden = false;
+      shotInput.value = '';
+      return;
+    }
+    if (f.size > 8 * 1024 * 1024){
+      err.textContent = 'Файл больше 8 МБ — попробуй картинку поменьше.';
+      err.hidden = false;
+      shotInput.value = '';
+      return;
+    }
+    if (state.shotUrl) URL.revokeObjectURL(state.shotUrl);
+    state.shotUrl = URL.createObjectURL(f);
+    state.project.shotName = f.name;
+    state.project.hasShot = true;
+    save();
+    renderShotArea();
+  });
+  renderShotArea();
+
+  el('btn-submit').addEventListener('click', function(){
+    simStop();
+    state.project.code = codeTa.value;
+    var eCode = el('e-code');
+    eCode.hidden = true;
+    if (state.project.code.trim().length < 10){
+      eCode.textContent = 'Вставь код своей программы (хотя бы несколько команд). Можно нажать «⬆ Вставить код из тренажёра» 😉';
+      eCode.hidden = false;
+      codeTa.focus();
+      return;
+    }
+    state.screen = 'result';
+    save();
+    render();
+  });
+}
+
+/* ============================================================
+   ЭКРАН: ИТОГ
+============================================================ */
+function resultHTML(){
+  var sc = computeScore();
+  var dateStr = new Date().toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
+  var h = '<section class="screen">' + backHTML();
+  h += '<div class="card result-hero">';
+  h += '<div class="logo" aria-hidden="true">🏁</div>';
+  h += '<h1 id="screen-title" tabindex="-1">Урок 2 пройден!</h1>';
+  h += '<p class="subtitle" style="margin-bottom:8px"><span id="res-name"></span> · класс <span id="res-class"></span> · ' + dateStr + '</p>';
+  h += '<div class="result-total">' + sc.total + '<span class="muted" style="font-size:20px;font-weight:500"> / 20 баллов</span></div>';
+  h += '<p class="result-rating">' + ratingText(sc.total) + '</p>';
+  h += '<p class="muted">Результат: ' + sc.percent + '%</p>';
+  h += '</div>';
+
+  h += '<div class="card"><h2>Из чего сложились баллы</h2><ul class="res-rows">';
+  h += '<li><span>Проверка знаний: ' + (state.quiz.checked ? sc.correct + ' из 5 верных ответов' : 'не пройдена') + '</span><span class="pts">' + sc.quizPoints + ' / 10</span></li>';
+  h += '<li><span>Код мини-проекта ' + (sc.codePoints ? '<span class="ok-mark">✔ приложен</span>' : '<span class="bad-mark">✘ не найден</span>') + '</span><span class="pts">' + sc.codePoints + ' / 5</span></li>';
+  h += '<li><span>Рисунок ' + (sc.shotPoints ? '<span class="ok-mark">✔ прикреплён</span>' : '<span class="bad-mark">✘ не прикреплён</span>') + '</span><span class="pts">' + sc.shotPoints + ' / 5</span></li>';
+  h += '</ul></div>';
+
+  if (!sc.shotPoints || !sc.codePoints){
+    h += '<div class="card tinted"><p style="margin:0">💡 Чтобы получить все 20 баллов, вернись к практике и добавь ' +
+         (!sc.codePoints && !sc.shotPoints ? 'код и рисунок' : (!sc.codePoints ? 'код' : 'рисунок')) + '.</p></div>';
+  }
+
+  h += '<div class="actions">';
+  h += '<button class="btn btn-primary" id="btn-print" type="button">💾 Сохранить в PDF (печать)</button>';
+  h += '<button class="btn btn-ghost" id="btn-restart" type="button">↺ Пройти заново</button>';
+  h += '</div>';
+  h += '<div class="lesson-nav">';
+  h += '<a class="btn btn-secondary" href="turtle1.html">← Урок 1</a>';
+  h += '<a class="btn btn-secondary" href="index.html">🏠 Все уроки</a>';
+  h += '<a class="btn btn-primary" href="turtle3.html">Урок 3: Циклы →</a>';
+  h += '</div>';
+  h += '<p class="muted" style="margin-top:12px">Кнопка «Сохранить в PDF» откроет окно печати — там выбери «Сохранить как PDF». Отправь файл учителю 📩</p>';
+  h += '</section>';
+  return h;
+}
+
+function setupResult(){
+  var nameEl = el('res-name'), classEl = el('res-class');
+  if (nameEl) nameEl.textContent = state.name;
+  if (classEl) classEl.textContent = state.klass;
+  el('btn-print').addEventListener('click', function(){
+    buildPrintReport();
+    window.print();
+  });
+  el('btn-restart').addEventListener('click', function(){
+    if (window.confirm('Начать урок заново? Все ответы и проект будут удалены.')){
+      clearSaved(); savedData = null;
+      if (state.shotUrl) URL.revokeObjectURL(state.shotUrl);
+      state = freshState();
+      render();
+    }
+  });
+  buildPrintReport(); // отчёт готов заранее
+}
+
+/* ============================================================
+   ПЕЧАТНЫЙ ОТЧЁТ (для «Сохранить как PDF»)
+   Безопасно: только createElement + textContent, без innerHTML
+============================================================ */
+function buildPrintReport(){
+  var r = el('print-report');
+  while (r.firstChild) r.removeChild(r.firstChild);
+  function mk(tag, cls, txt){
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (txt !== undefined && txt !== null) e.textContent = txt;
+    return e;
+  }
+  var sc = computeScore();
+  var dateStr = new Date().toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
+
+  r.appendChild(mk('h1','pr-h1','Рабочий лист · Урок 2'));
+  r.appendChild(mk('p','pr-sub','Курс «Я — исследователь: первые шаги в программировании» · Алгоритмы рисования'));
+
+  var meta = mk('p','pr-meta');
+  meta.appendChild(mk('div',null,'Ученик: ' + state.name));
+  meta.appendChild(mk('div',null,'Класс: ' + state.klass));
+  meta.appendChild(mk('div',null,'Дата: ' + dateStr));
+  r.appendChild(meta);
+
+  // Блок проверки знаний
+  r.appendChild(mk('h2','pr-h2','Проверка знаний (' + sc.correct + ' из 5 верно · ' + sc.quizPoints + ' баллов)'));
+  var ol = mk('ol','pr-quiz');
+  for (var i=0;i<QUIZ.length;i++){
+    var li = document.createElement('li');
+    var ansIdx = state.quiz.answers[i];
+    var isOk = ansIdx === QUIZ[i].correct;
+    li.appendChild(mk('span',null,QUIZ[i].q + ' — '));
+    li.appendChild(mk('b',null, ansIdx === null ? 'нет ответа' : QUIZ[i].options[ansIdx]));
+    li.appendChild(mk('span', isOk ? 'ok-mark' : 'bad-mark', isOk ? ' ✔' : ' ✘ (верный ответ: ' + QUIZ[i].options[QUIZ[i].correct] + ')'));
+    ol.appendChild(li);
+  }
+  r.appendChild(ol);
+
+  // Блок мини-проекта
+  r.appendChild(mk('h2','pr-h2','Мини-проект «Рисунок из простых фигур»'));
+  r.appendChild(mk('p',null,'Код программы:'));
+  r.appendChild(mk('pre','pr-code', state.project.code.trim() ? state.project.code : '(код не приложен)'));
+  r.appendChild(mk('p',null,'Рисунок:'));
+  if (state.project.hasShot && state.shotUrl){
+    var img = document.createElement('img');
+    img.src = state.shotUrl;
+    img.alt = 'Рисунок ученика';
+    img.className = 'pr-img';
+    r.appendChild(img);
+  } else {
+    r.appendChild(mk('p','pr-sub','(рисунок не прикреплён)'));
+  }
+
+  // Итог
+  var totalP = mk('p','pr-total');
+  totalP.appendChild(mk('b',null,'Итог: ' + sc.total + ' из 20 баллов (' + sc.percent + '%). '));
+  totalP.appendChild(document.createTextNode(ratingText(sc.total)));
+  r.appendChild(totalP);
+  r.appendChild(mk('p','pr-sub','Учитель информатики · курс «Я — исследователь: первые шаги в программировании»'));
+}
+
+/* ============================================================
+   РОУТЕР / RENDER
+============================================================ */
+var BACK_MAP = { theory:'start', quiz:'theory', practice:'quiz', result:'practice' };
+
+function render(){
+  simStop();
+  var app = el('app');
+  var html = headerHTML();
+  switch(state.screen){
+    case 'theory':   html += theoryHTML();   break;
+    case 'quiz':     html += quizHTML();     break;
+    case 'practice': html += practiceHTML(); break;
+    case 'result':   html += resultHTML();   break;
+    default:         html += startHTML();    state.screen = 'start';
+  }
+  app.innerHTML = html; // только статические шаблоны — без пользовательского ввода
+  setupScreen();
+  window.scrollTo(0,0);
+  var title = el('screen-title');
+  if (title) title.focus();
+}
+
+function setupScreen(){
+  // общая кнопка «Назад»
+  var back = el('btn-back');
+  if (back){
+    back.addEventListener('click', function(){
+      var prev = BACK_MAP[state.screen] || 'start';
+      state.screen = prev;
+      save();
+      render();
+    });
+  }
+  switch(state.screen){
+    case 'start':    setupStart();    break;
+    case 'theory':   setupTheory();   break;
+    case 'quiz':     setupQuiz();     break;
+    case 'practice': setupPractice(); break;
+    case 'result':   setupResult();   break;
+  }
+}
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+============================================================ */
+function init(){
+  savedData = load();
+  state = freshState();
+  render();
+}
+init();
+</script>
+</body>
+</html>
