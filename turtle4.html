@@ -176,6 +176,27 @@ label.idea:hover{border-color:#b8b8be}
 label.idea input{accent-color:var(--accent);flex:none;width:18px;height:18px}
 label.idea.selected{border-color:var(--accent);background:#f0f7ff;font-weight:600}
 
+/* ===== ТРЕБОВАНИЯ К ПРОЕКТУ ===== */
+.req-list{margin:0;padding-left:20px;font-size:15px}
+.req-list li{margin-bottom:10px}
+
+/* ===== ПРИМЕРЫ ПРОЕКТОВ (галерея демо) ===== */
+.demo-grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:640px){.demo-grid{grid-template-columns:repeat(2,1fr)}}
+.demo-card{
+  border:1px solid var(--line);border-radius:16px;padding:16px;
+  text-align:center;background:#fff;display:flex;flex-direction:column;
+}
+.demo-card h3{margin-bottom:2px}
+.demo-card .demo-desc{font-size:13px;color:var(--muted);margin:0 0 10px;min-height:36px}
+.demo-card canvas{
+  width:100%;max-width:230px;height:auto;aspect-ratio:1/1;
+  border:1px solid var(--line);border-radius:12px;background:#fff;
+  display:block;margin:0 auto 8px;
+}
+.demo-status{font-size:13px;min-height:20px;color:var(--muted);margin:0 0 8px}
+.demo-card .btn{width:100%;padding:10px 14px;font-size:15px;margin-top:auto}
+
 /* ===== ТРЕНАЖЁР ===== */
 .sim-wrap{display:flex;flex-direction:column;gap:14px}
 #sim-canvas{
@@ -193,11 +214,8 @@ label.idea.selected{border-color:var(--accent);background:#f0f7ff;font-weight:60
 .status-ok{color:var(--green-dark);font-weight:600}
 details.help{background:#f5f5f7;border-radius:12px;padding:4px 14px;margin:0}
 details.help summary{cursor:pointer;font-weight:600;font-size:15px;padding:10px 0;min-height:44px}
-details.hint{background:#fffbeb;border-radius:12px;padding:4px 14px;margin-top:8px}
-details.hint summary{cursor:pointer;font-weight:600;font-size:14px;color:#8a6d1a;padding:10px 0;min-height:44px}
-details.hint pre.code{margin:8px 0 12px}
 
-/* ===== ЭТАПЫ ПРОЕКТА ===== */
+/* ===== ЗАДАНИЯ ===== */
 .task{display:flex;gap:12px;margin-bottom:14px}
 .task:last-child{margin-bottom:0}
 .task-body{flex:1;min-width:0}
@@ -315,11 +333,7 @@ var QUIZ = [
   },
   {
     q: 'Какой угол поворота нужен, чтобы нарисовать правильный восьмиугольник? (Урок 3)',
-    options: [
-      '45°, потому что 360 : 8 = 45',
-      '90°',
-      '60°'
-    ],
+    options: ['45°', '90°', '60°'],
     correct: 0,
     explain: 'Секрет правильных фигур: полный оборот 360° делим на число сторон. 360 : 8 = 45°.'
   }
@@ -351,60 +365,416 @@ var IGNORE_CMDS = ['shape','speed','hideturtle','showturtle','done','exitonclick
 /* Скорости анимации (мс на один тик) */
 var SPEEDS = { slow: 520, normal: 280, fast: 90 };
 
-/* Заготовка проекта для тренажёра */
-var STARTER_CODE =
-'# Заготовка — начни свой проект здесь\n' +
+/* ============================================================
+   ПРИМЕРЫ ГОТОВЫХ ПРОЕКТОВ (для галереи вдохновения)
+   Код НЕ показывается ученикам — только пошаговая анимация.
+============================================================ */
+var DEMOS = [
+  {
+    title: 'Домик и солнышко 🏠',
+    desc: 'Квадрат-стена, треугольная крыша, дверь и солнце с 12 лучами',
+    code:
 'width 3\n' +
-'# солнышко с лучами\n' +
+'# солнце\n' +
+'penup\n' +
+'backward 90\n' +
+'left 90\n' +
+'forward 70\n' +
+'pendown\n' +
 'color orange\n' +
+'width 2\n' +
 'repeat 12:\n' +
-'  forward 50\n' +
 '  penup\n' +
-'  backward 50\n' +
+'  forward 28\n' +
+'  pendown\n' +
+'  forward 12\n' +
+'  penup\n' +
+'  backward 40\n' +
 '  pendown\n' +
 '  right 30\n' +
-'# сюда добавь свои фигуры\n' +
-'color blue\n' +
+'right 90\n' +
 'penup\n' +
-'forward 40\n' +
+'forward 22\n' +
+'left 90\n' +
 'pendown\n' +
+'width 3\n' +
+'circle 22\n' +
+'# дом: стена\n' +
+'penup\n' +
+'home\n' +
+'left 90\n' +
+'forward 40\n' +
+'left 90\n' +
+'forward 40\n' +
+'left 180\n' +
+'pendown\n' +
+'color brown\n' +
 'repeat 4:\n' +
 '  forward 60\n' +
-'  right 90';
-
-var CODE_ALL_CMDS =
-'# Движение и повороты\n' +
-'forward 100     # вперёд (fd)\n' +
-'backward 50     # назад (bk)\n' +
-'right 90        # поворот направо (rt)\n' +
-'left 45         # поворот налево (lt)\n' +
-'\n' +
-'# Фломастер\n' +
-'penup           # поднять — идти без линии\n' +
-'pendown         # опустить — снова рисовать\n' +
-'\n' +
-'# Стиль\n' +
-'color red       # цвет (можно по-русски)\n' +
-'width 3         # толщина линии (1–20)\n' +
-'\n' +
-'# Фигуры и помощники\n' +
-'circle 50       # круг радиусом 50\n' +
-'home            # в центр, смотреть направо\n' +
-'clear           # стереть рисунок';
-
-var CODE_LOOP_REMIND =
-'# Цикл — повторить N раз\n' +
+'  right 90\n' +
+'# крыша\n' +
+'color red\n' +
+'forward 60\n' +
+'left 120\n' +
+'forward 60\n' +
+'left 120\n' +
+'forward 60\n' +
+'# дверь\n' +
+'penup\n' +
+'home\n' +
+'right 90\n' +
+'forward 20\n' +
+'left 90\n' +
+'pendown\n' +
+'color yellow\n' +
+'width 2\n' +
+'repeat 2:\n' +
+'  forward 14\n' +
+'  left 90\n' +
+'  forward 24\n' +
+'  left 90'
+  },
+  {
+    title: 'Ночной город 🌃',
+    desc: 'Три здания разной высоты, светящиеся окна, луна и звёзды',
+    code:
+'width 3\n' +
+'# здание 1\n' +
+'penup\n' +
+'backward 110\n' +
+'right 90\n' +
+'forward 40\n' +
+'left 90\n' +
+'pendown\n' +
+'color gray\n' +
+'repeat 2:\n' +
+'  forward 40\n' +
+'  left 90\n' +
+'  forward 90\n' +
+'  left 90\n' +
+'# здание 2\n' +
+'penup\n' +
+'forward 50\n' +
+'pendown\n' +
+'color purple\n' +
+'repeat 2:\n' +
+'  forward 50\n' +
+'  left 90\n' +
+'  forward 60\n' +
+'  left 90\n' +
+'# здание 3 (башня)\n' +
+'penup\n' +
+'forward 60\n' +
+'pendown\n' +
+'color blue\n' +
+'repeat 2:\n' +
+'  forward 45\n' +
+'  left 90\n' +
+'  forward 110\n' +
+'  left 90\n' +
+'# окна\n' +
+'color yellow\n' +
+'width 2\n' +
+'penup\n' +
+'home\n' +
+'backward 98\n' +
+'right 90\n' +
+'forward 15\n' +
+'left 90\n' +
+'pendown\n' +
+'repeat 4:\n' +
+'  forward 7\n' +
+'  left 90\n' +
+'penup\n' +
+'home\n' +
+'backward 98\n' +
+'right 90\n' +
+'backward 10\n' +
+'left 90\n' +
+'pendown\n' +
+'repeat 4:\n' +
+'  forward 7\n' +
+'  left 90\n' +
+'penup\n' +
+'home\n' +
+'backward 50\n' +
+'right 90\n' +
+'forward 10\n' +
+'left 90\n' +
+'pendown\n' +
+'repeat 4:\n' +
+'  forward 7\n' +
+'  left 90\n' +
+'penup\n' +
+'home\n' +
+'backward 50\n' +
+'right 90\n' +
+'backward 10\n' +
+'left 90\n' +
+'pendown\n' +
+'repeat 4:\n' +
+'  forward 7\n' +
+'  left 90\n' +
+'penup\n' +
+'home\n' +
+'forward 15\n' +
+'right 90\n' +
+'backward 40\n' +
+'left 90\n' +
+'pendown\n' +
+'repeat 4:\n' +
+'  forward 7\n' +
+'  left 90\n' +
+'penup\n' +
+'home\n' +
+'forward 15\n' +
+'right 90\n' +
+'forward 5\n' +
+'left 90\n' +
+'pendown\n' +
+'repeat 4:\n' +
+'  forward 7\n' +
+'  left 90\n' +
+'# луна\n' +
+'penup\n' +
+'home\n' +
+'forward 85\n' +
+'right 90\n' +
+'backward 70\n' +
+'left 90\n' +
+'pendown\n' +
+'color yellow\n' +
+'width 2\n' +
+'circle 14\n' +
+'# звёзды\n' +
+'penup\n' +
+'home\n' +
+'backward 60\n' +
+'right 90\n' +
+'backward 40\n' +
+'left 90\n' +
+'pendown\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'right 90\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'left 90\n' +
+'penup\n' +
+'home\n' +
+'forward 65\n' +
+'right 90\n' +
+'backward 80\n' +
+'left 90\n' +
+'pendown\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'right 90\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5'
+  },
+  {
+    title: 'Цветочная поляна 🌸',
+    desc: 'Три цветка из лепестков-кругов, зелёные стебли и земля',
+    code:
+'width 3\n' +
+'# земля\n' +
+'color green\n' +
+'penup\n' +
+'home\n' +
+'right 90\n' +
+'forward 50\n' +
+'left 90\n' +
+'pendown\n' +
+'backward 140\n' +
+'forward 280\n' +
+'penup\n' +
+'backward 140\n' +
+'# цветок 1\n' +
+'penup\n' +
+'home\n' +
+'backward 80\n' +
+'left 90\n' +
+'forward 50\n' +
+'pendown\n' +
+'color pink\n' +
+'width 2\n' +
 'repeat 6:\n' +
-'  forward 60      # команды внутри цикла —\n' +
-'  right 60        # с отступом в 2 пробела!\n' +
-'\n' +
-'# В Python это записывается так:\n' +
-'# for i in range(6):\n' +
-'#     t.forward(60)\n' +
-'#     t.right(60)\n' +
-'\n' +
-'# Секрет правильных фигур:\n' +
-'# угол поворота = 360 : число сторон';
+'  circle 13\n' +
+'  right 60\n' +
+'color green\n' +
+'width 3\n' +
+'right 180\n' +
+'forward 100\n' +
+'# цветок 2\n' +
+'penup\n' +
+'home\n' +
+'left 90\n' +
+'forward 70\n' +
+'pendown\n' +
+'color purple\n' +
+'width 2\n' +
+'repeat 6:\n' +
+'  circle 13\n' +
+'  right 60\n' +
+'color green\n' +
+'width 3\n' +
+'right 180\n' +
+'forward 120\n' +
+'# цветок 3\n' +
+'penup\n' +
+'home\n' +
+'forward 80\n' +
+'left 90\n' +
+'forward 40\n' +
+'pendown\n' +
+'color red\n' +
+'width 2\n' +
+'repeat 6:\n' +
+'  circle 13\n' +
+'  right 60\n' +
+'color green\n' +
+'width 3\n' +
+'right 180\n' +
+'forward 90\n' +
+'# солнышко\n' +
+'color orange\n' +
+'width 2\n' +
+'penup\n' +
+'home\n' +
+'forward 100\n' +
+'left 90\n' +
+'forward 80\n' +
+'pendown\n' +
+'circle 15'
+  },
+  {
+    title: 'Ракета и звёзды 🚀',
+    desc: 'Корпус, красный нос, иллюминатор-круг, пламя и звёзды вокруг',
+    code:
+'width 3\n' +
+'# корпус ракеты\n' +
+'penup\n' +
+'backward 20\n' +
+'right 90\n' +
+'forward 50\n' +
+'left 90\n' +
+'pendown\n' +
+'color gray\n' +
+'repeat 2:\n' +
+'  forward 40\n' +
+'  left 90\n' +
+'  forward 90\n' +
+'  left 90\n' +
+'# нос\n' +
+'penup\n' +
+'home\n' +
+'left 90\n' +
+'forward 40\n' +
+'left 90\n' +
+'forward 20\n' +
+'right 180\n' +
+'pendown\n' +
+'color red\n' +
+'left 60\n' +
+'forward 40\n' +
+'right 120\n' +
+'forward 40\n' +
+'right 120\n' +
+'forward 40\n' +
+'# иллюминатор\n' +
+'penup\n' +
+'home\n' +
+'forward 8\n' +
+'left 90\n' +
+'pendown\n' +
+'color skyblue\n' +
+'width 2\n' +
+'circle 8\n' +
+'# пламя\n' +
+'penup\n' +
+'home\n' +
+'right 90\n' +
+'forward 50\n' +
+'left 90\n' +
+'backward 10\n' +
+'pendown\n' +
+'color orange\n' +
+'width 3\n' +
+'repeat 3:\n' +
+'  right 90\n' +
+'  forward 18\n' +
+'  backward 18\n' +
+'  left 90\n' +
+'  forward 10\n' +
+'# звёзды\n' +
+'color yellow\n' +
+'width 2\n' +
+'penup\n' +
+'home\n' +
+'backward 90\n' +
+'right 90\n' +
+'backward 90\n' +
+'left 90\n' +
+'pendown\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'right 90\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'left 90\n' +
+'penup\n' +
+'home\n' +
+'forward 100\n' +
+'right 90\n' +
+'backward 80\n' +
+'left 90\n' +
+'pendown\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'right 90\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'left 90\n' +
+'penup\n' +
+'home\n' +
+'backward 70\n' +
+'right 90\n' +
+'forward 40\n' +
+'left 90\n' +
+'pendown\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'right 90\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'left 90\n' +
+'penup\n' +
+'home\n' +
+'forward 80\n' +
+'right 90\n' +
+'forward 45\n' +
+'left 90\n' +
+'pendown\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5\n' +
+'right 90\n' +
+'forward 5\n' +
+'backward 10\n' +
+'forward 5'
+  }
+];
 
 /* ============================================================
    СОСТОЯНИЕ
@@ -416,19 +786,23 @@ function freshState(){
     klass: '',
     quiz: { answers: [null,null,null,null,null], checked: false, score: 0 },
     project: { idea:'', title:'', plan:'', code:'', shotName:'', hasShot:false },
-    shotUrl: null,          // не сохраняется (blob живёт только в сессии)
+    shotUrl: null,               // не сохраняется (blob живёт только в сессии)
     simCode: ''
   };
 }
 var state = freshState();
-var savedData = null;       // данные из localStorage при старте
+var savedData = null;            // данные из localStorage при старте
 
+/* Паспорт проекта из Урока 4 (идея / название / план) — только для чтения */
 /* Состояние тренажёра (не сохраняется) */
 var sim = {
   segments: [],
   turtle: { x:150, y:150, h:0, pen:true, color:'#1d1d1f', width:2 },
   running: false, timer: null, ops: [], idx: 0, delay: 280, batch: 1
 };
+
+/* Состояния демо-примеров (пересоздаются при каждом рендере) */
+var demoStates = [];
 
 /* ============================================================
    СОХРАНЕНИЕ / ЗАГРУЗКА ПРОГРЕССА
@@ -472,8 +846,13 @@ function debounce(fn, ms){
   };
 }
 function firstName(){
-  var n = state.name.trim().split(/\s+/);
-  return n.length ? n[0] : '';
+  // порядок ввода «Фамилия Имя» → имя является вторым словом
+  var parts = state.name.trim().split(/\s+/);
+  if (parts.length >= 2) return parts[1];
+  return parts[0] || '';
+}
+function freshTurtle(){
+  return { x:150, y:150, h:0, pen:true, color:'#1d1d1f', width:2 };
 }
 
 /* ============================================================
@@ -630,9 +1009,43 @@ function setupStart(){
 /* ============================================================
    ЭКРАН: ТЕОРИЯ — КРАТКАЯ СВОДКА ПО ВСЕМ ТЕМАМ
 ============================================================ */
+var CODE_ALL_CMDS =
+'# Движение и повороты\n' +
+'forward 100     # вперёд (fd)\n' +
+'backward 50     # назад (bk)\n' +
+'right 90        # поворот направо (rt)\n' +
+'left 45         # поворот налево (lt)\n' +
+'\n' +
+'# Фломастер\n' +
+'penup           # поднять — идти без линии\n' +
+'pendown         # опустить — снова рисовать\n' +
+'\n' +
+'# Стиль\n' +
+'color red       # цвет (можно по-русски)\n' +
+'width 3         # толщина линии (1–20)\n' +
+'\n' +
+'# Фигуры и помощники\n' +
+'circle 50       # круг радиусом 50\n' +
+'home            # в центр, смотреть направо\n' +
+'clear           # стереть рисунок';
+
+var CODE_LOOP_REMIND =
+'# Цикл — повторить N раз\n' +
+'repeat 6:\n' +
+'  forward 60      # команды внутри цикла —\n' +
+'  right 60        # с отступом в 2 пробела!\n' +
+'\n' +
+'# В Python это записывается так:\n' +
+'# for i in range(6):\n' +
+'#     t.forward(60)\n' +
+'#     t.right(60)\n' +
+'\n' +
+'# Секрет правильных фигур:\n' +
+'# угол поворота = 360 : число сторон';
+
 function theoryHTML(){
   var h = '<section class="screen">' + backHTML();
-  h += '<h1 id="screen-title" tabindex="-1">Всё, что ты узнал — в одном месте <span id="hello-name"></span></h1>';
+  h += '<h1 id="screen-title" tabindex="-1">Всё, что ты узнал — в одном месте<span id="hello-name"></span></h1>';
   h += '<p class="subtitle">Краткая сводка по трём урокам. Прочитай (~8 минут) — и смело проходи итоговый тест!</p>';
 
   h += '<div class="card"><h2>1. Команды черепашки (Урок 1) 🐢</h2>';
@@ -683,7 +1096,10 @@ function theoryHTML(){
 
 function setupTheory(){
   var greet = el('hello-name');
-  if (greet && firstName()) greet.textContent = ', ' + firstName() + '! 👋';
+  if (greet){
+    var fn = firstName();
+    greet.textContent = fn ? ', ' + fn + '! 👋' : '! 👋';
+  }
   el('to-quiz').addEventListener('click', function(){ state.screen = 'quiz'; save(); render(); });
 }
 
@@ -791,9 +1207,37 @@ function practiceHTML(){
   /* --- Этапы работы --- */
   h += '<div class="card"><h2>Твой план работы на урок (~25 минут)</h2>';
   h += '<div class="task"><span class="task-num">1</span><div class="task-body"><h3>Паспорт проекта</h3><p>Выбери идею, придумай название и опиши план: из каких фигур состоит рисунок, какие команды и циклы понадобятся.</p></div></div>';
-  h += '<div class="task"><span class="task-num">2</span><div class="task-body"><h3>Первый код</h3><p>Начни программировать в тренажёре: сначала одна фигура, потом вторая. Нажми «Заготовка», если нужна отправная точка.</p></div></div>';
-  h += '<div class="task"><span class="task-num">3</span><div class="task-body"><h3>Черновик рисунка</h3><p>Скачай то, что уже получается («📷 Скачать рисунок»), и прикрепи внизу. Это черновик — на Уроке 5 ты его улучшишь!</p></div></div>';
+  h += '<div class="task"><span class="task-num">2</span><div class="task-body"><h3>Вдохновись примерами</h3><p>Посмотри четыре готовых проекта ниже и запусти их анимацию — увидишь, как программа рисуется шаг за шагом. Все приёмы оттуда тебе знакомы!</p></div></div>';
+  h += '<div class="task"><span class="task-num">3</span><div class="task-body"><h3>Первый код</h3><p>Начни программировать в тренажёре: сначала одна фигура, потом вторая. Пиши код сам — подсматривать некуда, кода примеров не видно 😉</p></div></div>';
+  h += '<div class="task"><span class="task-num">4</span><div class="task-body"><h3>Черновик рисунка</h3><p>Скачай то, что уже получается («📷 Скачать рисунок»), и прикрепи внизу. Это черновик — на Уроке 5 ты его улучшишь!</p></div></div>';
   h += '</div>';
+
+  /* --- Требования к проекту --- */
+  h += '<div class="card"><h2>Требования к проекту ⭐</h2>';
+  h += '<p class="muted" style="margin-bottom:10px">Твой финальный проект должен содержать всё перечисленное. Лучше делать по требованиям сразу — на Уроке 5 будет строгий чек-лист!</p>';
+  h += '<ul class="req-list">';
+  h += '<li>🎨 <b>Минимум 3 разных цвета</b> — команда <code>color</code></li>';
+  h += '<li>🖊 <b>Минимум 2 толщины линий</b> — команда <code>width</code>: контуры толще, мелкие детали тоньше</li>';
+  h += '<li>🔁 <b>Минимум 1 цикл</b> — <code>repeat N:</code> или <code>for i in range(N):</code></li>';
+  h += '<li>🧩 <b>Минимум 3 простые фигуры</b> — квадраты, треугольники, круги, линии</li>';
+  h += '<li>✈️ <b>penup / pendown</b> — перемещение черепашки без рисования</li>';
+  h += '<li>💬 <b>Комментарии #</b> — подпиши части программы: «# крыша», «# солнце»</li>';
+  h += '</ul></div>';
+
+  /* --- Примеры проектов (галерея демо) --- */
+  h += '<div class="card"><h2>Примеры проектов 🖼</h2>';
+  h += '<p class="muted" style="margin-bottom:14px">Нажми «▶ Запустить» и смотри, как проект рисуется шаг за шагом. Код мы не показываем — твой проект должен быть твоим! Обрати внимание: в каждом примере есть цвета, разная толщина линий и циклы.</p>';
+  h += '<div class="demo-grid">';
+  for (var d=0;d<DEMOS.length;d++){
+    h += '<div class="demo-card">';
+    h += '<h3>' + DEMOS[d].title + '</h3>';
+    h += '<p class="demo-desc">' + DEMOS[d].desc + '</p>';
+    h += '<canvas id="demo-canvas-' + d + '" width="300" height="300" role="img" aria-label="Пример проекта: ' + DEMOS[d].title + '"></canvas>';
+    h += '<p class="demo-status" id="demo-status-' + d + '" aria-live="polite"></p>';
+    h += '<button class="btn btn-secondary" id="demo-run-' + d + '" type="button">▶ Запустить</button>';
+    h += '</div>';
+  }
+  h += '</div></div>';
 
   /* --- Паспорт проекта --- */
   h += '<div class="card tinted"><h2>Шаг 1. Паспорт проекта 📇</h2>';
@@ -812,7 +1256,7 @@ function practiceHTML(){
   h += '<div class="field"><label for="p-plan">План: из чего состоит рисунок?</label>';
   h += '<textarea id="p-plan" class="plan-ta" rows="4" placeholder="Пример: домик из квадрата (стены) и треугольника (крыша), рядом солнышко — круг и 12 лучей циклом repeat 12. Цвета: brown, red, orange."></textarea>';
   h += '<p class="err" id="e-plan" hidden></p>';
-  h += '<p class="muted" style="margin-top:6px">Опиши фигуры, команды и циклы — этот план поможет на следующем уроке.</p></div>';
+  h += '<p class="muted" style="margin-top:6px">Опиши фигуры, команды и циклы — проверь, что план отвечает требованиям ⭐ выше.</p></div>';
   h += '</div>';
 
   /* --- Тренажёр --- */
@@ -822,7 +1266,6 @@ function practiceHTML(){
   h += '<div class="sim-controls">';
   h += '<button class="btn btn-primary" id="btn-run" type="button">▶ Запустить</button>';
   h += '<button class="btn btn-secondary" id="btn-stop" type="button" disabled>■ Стоп</button>';
-  h += '<button class="btn btn-ghost" id="btn-sample" type="button">Заготовка</button>';
   h += '<button class="btn btn-ghost" id="btn-clear" type="button">Очистить</button>';
   h += '<button class="btn btn-ghost" id="btn-download" type="button">📷 Скачать рисунок</button>';
   h += '</div>';
@@ -852,7 +1295,7 @@ function practiceHTML(){
   /* --- Начало кода проекта --- */
   h += '<div class="card"><h2>Шаг 3. Начало кода проекта 💻</h2>';
   h += '<label class="lbl" for="project-code">Код, который уже готов</label>';
-  h += '<textarea id="project-code" rows="8" spellcheck="false" placeholder="# Мой проект «...»&#10;width 3&#10;color orange&#10;repeat 12:&#10;  forward 50&#10;  ..."></textarea>';
+  h += '<textarea id="project-code" rows="8" spellcheck="false" placeholder="# Мой проект «...»&#10;width 3&#10;color orange&#10;repeat 12:&#10;  ..."></textarea>';
   h += '<button class="btn btn-ghost btn-from-sim" id="btn-from-sim" type="button">⬆ Вставить код из тренажёра</button>';
   h += '<p class="err" id="e-code" hidden></p></div>';
 
@@ -997,16 +1440,39 @@ function parseProgram(text){
   }
 }
 
-/* ---------- Отрисовка поля ---------- */
-function simReset(){
-  sim.segments = [];
-  sim.turtle = { x:150, y:150, h:0, pen:true, color:'#1d1d1f', width:2 };
-  simDraw();
+/* ============================================================
+   МИР ЧЕРЕПАШКИ — общие функции рисования
+   (использует и основной тренажёр, и демо-примеры)
+============================================================ */
+function worldMove(w, dist){
+  var t = w.turtle;
+  var rad = t.h * Math.PI / 180;
+  var nx = t.x + dist * Math.cos(rad);
+  var ny = t.y + dist * Math.sin(rad);
+  if (t.pen) w.segments.push({ x1:t.x, y1:t.y, x2:nx, y2:ny, c:t.color, w:t.width });
+  t.x = nx; t.y = ny;
 }
-function simDraw(){
-  var cv = el('sim-canvas');
-  if (!cv) return;
-  var ctx = cv.getContext('2d');
+function worldApply(w, op){
+  var t = w.turtle;
+  switch(op.t){
+    case 'fd': worldMove(w, op.d); break;
+    case 'turn': t.h = (t.h + op.a) % 360; break;
+    case 'pen': t.pen = op.v; break;
+    case 'color': t.color = op.v; break;
+    case 'width': t.width = op.v; break;
+    case 'circle':
+      var steps = 36;
+      var seg = (2 * Math.PI * Math.abs(op.r)) / steps;
+      var dir = op.r >= 0 ? -10 : 10; // положительный радиус — против часовой
+      for (var i=0;i<steps;i++){ worldMove(w, seg); t.h += dir; }
+      break;
+    case 'home': t.x = 150; t.y = 150; t.h = 0; break;
+    case 'clear': w.segments = []; break;
+  }
+}
+function worldDraw(canvas, w){
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,300,300);
   // сетка
   ctx.strokeStyle = '#f0f0f2'; ctx.lineWidth = 1;
@@ -1018,13 +1484,13 @@ function simDraw(){
   ctx.stroke();
   // линии рисунка
   ctx.lineCap = 'round';
-  for (var i=0;i<sim.segments.length;i++){
-    var s = sim.segments[i];
+  for (var i=0;i<w.segments.length;i++){
+    var s = w.segments[i];
     ctx.strokeStyle = s.c; ctx.lineWidth = s.w;
     ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
   }
   // черепашка
-  var t = sim.turtle;
+  var t = w.turtle;
   ctx.save();
   ctx.translate(t.x, t.y);
   ctx.rotate(t.h * Math.PI / 180);
@@ -1035,31 +1501,100 @@ function simDraw(){
   ctx.beginPath(); ctx.moveTo(4,0); ctx.lineTo(12,0); ctx.stroke(); // куда смотрит
   ctx.restore();
 }
-function simMove(dist){
-  var t = sim.turtle;
-  var rad = t.h * Math.PI / 180;
-  var nx = t.x + dist * Math.cos(rad);
-  var ny = t.y + dist * Math.sin(rad);
-  if (t.pen) sim.segments.push({ x1:t.x, y1:t.y, x2:nx, y2:ny, c:t.color, w:t.width });
-  t.x = nx; t.y = ny;
+
+/* ============================================================
+   ДЕМО-ПРИМЕРЫ (галерея готовых проектов)
+============================================================ */
+function makeDemoState(i){
+  var res = parseProgram(DEMOS[i].code);
+  return {
+    idx: i,
+    ops: res.error ? [] : res.ops,
+    segments: [],
+    turtle: freshTurtle(),
+    running: false, timer: null, opIdx: 0, batch: 1, delay: 80
+  };
 }
-function applyOp(op){
-  var t = sim.turtle;
-  switch(op.t){
-    case 'fd': simMove(op.d); break;
-    case 'turn': t.h = (t.h + op.a) % 360; break;
-    case 'pen': t.pen = op.v; break;
-    case 'color': t.color = op.v; break;
-    case 'width': t.width = op.v; break;
-    case 'circle':
-      var steps = 36;
-      var seg = (2 * Math.PI * Math.abs(op.r)) / steps;
-      var dir = op.r >= 0 ? -10 : 10; // положительный радиус — против часовой
-      for (var i=0;i<steps;i++){ simMove(seg); t.h += dir; }
-      break;
-    case 'home': t.x = 150; t.y = 150; t.h = 0; break;
-    case 'clear': sim.segments = []; break;
+function demoStop(d, msg){
+  clearTimeout(d.timer);
+  d.running = false;
+  var btn = el('demo-run-' + d.idx);
+  if (btn) btn.textContent = '▶ Запустить';
+  var st = el('demo-status-' + d.idx);
+  if (st && msg !== null && msg !== undefined) st.textContent = msg;
+}
+function demoStopAll(){
+  for (var i=0;i<demoStates.length;i++){
+    if (demoStates[i]) demoStop(demoStates[i], null);
   }
+}
+function demoStart(d){
+  // одновременно запускаем только одно демо
+  for (var i=0;i<demoStates.length;i++){
+    if (demoStates[i] !== d) demoStop(demoStates[i], null);
+  }
+  if (!d.ops.length) return;
+  clearTimeout(d.timer);
+  d.segments = [];
+  d.turtle = freshTurtle();
+  d.opIdx = 0;
+  d.running = true;
+  var n = d.ops.length;
+  d.batch = Math.max(1, Math.ceil(n / 120));
+  d.delay = 80;
+  var btn = el('demo-run-' + d.idx);
+  if (btn) btn.textContent = '■ Остановить';
+  var st = el('demo-status-' + d.idx);
+  if (st) st.textContent = 'Рисую… следи за шагами черепашки!';
+  worldDraw(el('demo-canvas-' + d.idx), d);
+  d.timer = setTimeout(function tick(){
+    if (d.opIdx >= d.ops.length){
+      d.running = false;
+      var b = el('demo-run-' + d.idx);
+      if (b) b.textContent = '▶ Запустить ещё раз';
+      var s = el('demo-status-' + d.idx);
+      if (s) s.textContent = 'Готово! 🎉 Шагов: ' + d.ops.length;
+      worldDraw(el('demo-canvas-' + d.idx), d);
+      return;
+    }
+    for (var k=0; k<d.batch && d.opIdx<d.ops.length; k++){
+      worldApply(d, d.ops[d.opIdx++]);
+    }
+    worldDraw(el('demo-canvas-' + d.idx), d);
+    d.timer = setTimeout(tick, d.delay);
+  }, d.delay);
+}
+function demoToggle(i){
+  var d = demoStates[i];
+  if (!d) return;
+  if (d.running) demoStop(d, 'Остановлено. Нажми «Запустить», чтобы начать сначала.');
+  else demoStart(d);
+}
+function setupDemos(){
+  demoStopAll();
+  demoStates = [];
+  for (var i=0;i<DEMOS.length;i++){
+    demoStates.push(makeDemoState(i));
+  }
+  for (var j=0;j<demoStates.length;j++){
+    (function(d){
+      worldDraw(el('demo-canvas-' + d.idx), d);
+      var btn = el('demo-run-' + d.idx);
+      if (btn) btn.addEventListener('click', function(){ demoToggle(d.idx); });
+    })(demoStates[j]);
+  }
+}
+
+/* ============================================================
+   ОСНОВНОЙ ТРЕНАЖЁР
+============================================================ */
+function simReset(){
+  sim.segments = [];
+  sim.turtle = freshTurtle();
+  simDraw();
+}
+function simDraw(){
+  worldDraw(el('sim-canvas'), sim);
 }
 function simSetButtons(){
   var run = el('btn-run'), stop = el('btn-stop');
@@ -1068,6 +1603,7 @@ function simSetButtons(){
 }
 function simRun(){
   if (sim.running) return;
+  demoStopAll(); // demos don't compete with the main canvas animation
   var ta = el('sim-code');
   var st = el('sim-status');
   var res = parseProgram(ta.value);
@@ -1106,7 +1642,7 @@ function simRun(){
       return;
     }
     for (var b=0; b<sim.batch && sim.idx<sim.ops.length; b++){
-      applyOp(sim.ops[sim.idx++]);
+      worldApply(sim, sim.ops[sim.idx++]);
     }
     simDraw();
     sim.timer = setTimeout(tick, sim.delay);
@@ -1182,6 +1718,9 @@ function renderShotArea(){
 }
 
 function setupPractice(){
+  /* --- демо-примеры --- */
+  setupDemos();
+
   /* --- паспорт проекта --- */
   var ideaRadios = document.querySelectorAll('input[name="idea"]');
   for (var r=0;r<ideaRadios.length;r++){
@@ -1217,12 +1756,6 @@ function setupPractice(){
   el('btn-stop').addEventListener('click', simStop);
   el('btn-download').addEventListener('click', simDownload);
   el('btn-clear').addEventListener('click', function(){ simStop(); simReset(); var st = el('sim-status'); st.className='status'; st.textContent='Поле очищено. Можно рисовать заново!'; });
-  el('btn-sample').addEventListener('click', function(){
-    simStop();
-    ta.value = STARTER_CODE;
-    state.simCode = STARTER_CODE; save();
-    var st = el('sim-status'); st.className='status'; st.textContent='Я загрузил заготовку — солнышко и квадрат. Запусти и переделай под свою идею!';
-  });
 
   /* --- начало кода проекта --- */
   var codeTa = el('project-code');
@@ -1272,6 +1805,7 @@ function setupPractice(){
   /* --- завершение урока с проверкой всех полей --- */
   el('btn-submit').addEventListener('click', function(){
     simStop();
+    demoStopAll();
     state.project.title = titleInput.value;
     state.project.plan = planTa.value;
     state.project.code = codeTa.value;
@@ -1291,7 +1825,7 @@ function setupPractice(){
       if (!firstBad) firstBad = titleInput;
     }
     if (state.project.plan.trim().length < 15){
-      ePlan.textContent = 'Опиши план подробнее: из каких фигур состоит рисунок, какие команды и циклы понадобиются? (минимум 15 символов)';
+      ePlan.textContent = 'Опиши план подробнее: из каких фигур состоит рисунок, какие команды и циклы понадобятся? (минимум 15 символов)';
       ePlan.hidden = false;
       if (!firstBad) firstBad = planTa;
     }
@@ -1305,7 +1839,6 @@ function setupPractice(){
       firstBad.scrollIntoView({ behavior:'smooth', block:'center' });
       return;
     }
-    save();
     state.screen = 'result';
     save();
     render();
@@ -1343,12 +1876,12 @@ function resultHTML(){
     var missing = [];
     if (!sc.passportPoints) missing.push('паспорт проекта');
     if (!sc.codePoints) missing.push('начало кода');
-    h += missing.length ? missing.join(' и ') : '—' ;
+    h += missing.length ? missing.join(' и ') : '—';
     h += '.</p></div>';
   }
 
   h += '<div class="card tinted"><h2>Что дальше? 🔜</h2>';
-  h += '<p style="margin:0">На <b>Уроке 5</b> ты продолжишь свой проект: допишешь код, найдёшь и исправишь ошибки, улучшишь оформление. Сохрани этот рабочий лист в PDF — на следующем уроке он покажет, с чего ты начал!</p></div>';
+  h += '<p style="margin:0">На <b>Уроке 5</b> ты продолжишь свой проект: допишешь код, найдёшь и исправишь ошибки, улучшишь оформление. Помни про требования ⭐: 3 цвета, 2 толщины, цикл, 3 фигуры, penup/pendown и комментарии. Сохрани этот рабочий лист в PDF — на следующем уроке он покажет, с чего ты начал!</p></div>';
 
   h += '<div class="actions">';
   h += '<button class="btn btn-primary" id="btn-print" type="button">💾 Сохранить в PDF (печать)</button>';
@@ -1469,6 +2002,7 @@ var BACK_MAP = { theory:'start', quiz:'theory', practice:'quiz', result:'practic
 
 function render(){
   simStop();
+  demoStopAll();
   var app = el('app');
   var html = headerHTML();
   switch(state.screen){
